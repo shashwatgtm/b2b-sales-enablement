@@ -9,8 +9,8 @@
   "repository": "https://github.com/shashwatgtm/b2b-sales-enablement",
   "license": "MIT",
   "skills": [
-    "./skills/sales-proposal-builder",
-    "./skills/competitive-intelligence",
-    "./skills/meeting-prep-debrief"
+    "skills/sales-proposal-builder",
+    "skills/competitive-intelligence",
+    "skills/meeting-prep-debrief"
   ]
 }
