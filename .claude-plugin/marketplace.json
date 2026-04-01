@@ -1,0 +1,26 @@
+{
+  "name": "shashwatgtm-sales-enablement",
+  "version": "1.0.0",
+  "owner": {
+    "name": "Shashwat Ghosh",
+    "url": "https://www.gtmexpert.com",
+    "github": "shashwatgtm"
+  },
+  "description": "B2B Sales Enablement: client presentations, proposals, battle cards, and meeting prep using client brand styling.",
+  "plugins": [
+    {
+      "name": "b2b-sales-enablement",
+      "source": "./",
+      "version": "1.0.0",
+      "description": "Client-ready PPTX/DOCX proposals in client brand style, competitive battle cards, and meeting prep/debrief.",
+      "category": "sales",
+      "tags": ["b2b", "sales", "proposals", "presentations", "competitive-intelligence"],
+      "strict": false,
+      "skills": [
+        "./skills/sales-proposal-builder",
+        "./skills/competitive-intelligence",
+        "./skills/meeting-prep-debrief"
+      ]
+    }
+  ]
+}
