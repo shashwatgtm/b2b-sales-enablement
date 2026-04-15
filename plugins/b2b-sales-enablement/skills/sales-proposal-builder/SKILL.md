@@ -88,14 +88,14 @@ Activate this skill when you see:
 - "proposal document", "client deliverable", "leave-behind"
 - "presentation for [company name]", "deck for the CXO meeting"
 - "using their brand", "in their style", "match their template"
-- Uploaded PPTX or DOCX with request to "create something similar" or "use this style"
+- Uploaded PPTX, DOCX, or PDF with request to "create something similar" or "use this style"
 
 ## Brand Style Discovery
 
 This is the critical differentiator. Before building any output, determine the
 client's visual identity.
 
-### Path A: Client Uploads a Sample (Preferred)
+### Path A1: Client Uploads a PPTX or DOCX (Best)
 
 When the user uploads a PPTX or DOCX file (their company deck, a previous proposal,
 or even a downloaded competitor deck):
@@ -128,6 +128,48 @@ or even a downloaded competitor deck):
    ```
    /home/claude/brand_styles/<company-name>_brand_style.json
    ```
+
+
+### Path A2: Client Uploads a PDF
+
+> **v1.1 upgrade planned:** This path uses visual inspection to estimate brand tokens, which produces a usable approximation but is less precise than Path A1's structured XML parsing. v1.1 will add a Python extraction script using PyMuPDF to read color and font metadata directly from PDF content streams, bringing PDF extraction quality on par with PPTX/DOCX (~90% of real-world PDFs). Until then, always confirm extracted tokens with the user before building output.
+
+PDFs do not contain structured XML with font and color metadata the way PPTX/DOCX
+files do. When a user uploads a PDF as their brand sample:
+
+1. View the PDF visually (claude.ai renders PDFs as images natively). Examine the
+   first 3-5 pages to identify:
+   - **Primary brand color**: the dominant non-white, non-black color used for
+     backgrounds, headers, or accent elements
+   - **Secondary/accent colors**: used for icons, highlights, callout boxes, or
+     borders
+   - **Text color**: the color used for body text (usually dark navy or black)
+   - **Background color**: the primary slide/page background
+   - **Heading font**: identify by visual characteristics (serif vs sans-serif,
+     geometric vs humanist, weight). Name the closest match
+   - **Body font**: same approach
+   - **Layout pattern**: card-based, full-bleed color backgrounds, white space
+     heavy, icon+text rows, etc.
+
+2. Build a brand token summary from visual inspection:
+   ```
+   Brand tokens (extracted from PDF visual inspection):
+   - Primary color: [hex code - use a color picker or best estimate]
+   - Heading font: [closest match, e.g., "geometric sans-serif similar to Montserrat"]
+   - Body font: [closest match]
+   - Background: [color]
+   - Layout: [pattern description]
+   ```
+
+3. Confirm with the user: "I've analyzed your PDF visually. Here is what I found:
+   [token summary]. These are estimates since PDFs don't contain editable style
+   data. Should I proceed, or would you like to adjust any colors or fonts?"
+
+4. If higher precision is needed, ask: "For exact color matching, do you happen
+   to have the original PPTX or DOCX? Or can you share your brand hex codes?"
+
+The visual extraction path is less precise than PPTX/DOCX parsing but produces
+a usable approximation that is far better than generic defaults.
 
 ### Path B: No Sample Available
 
