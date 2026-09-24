@@ -2,6 +2,8 @@
 
 Client presentations, proposals, battle cards, and meeting prep for B2B sales professionals.
 
+Plugin page with install steps for Claude Code and Cowork, and real example outputs from each skill: https://tools.gtmhelix.com/plugins/b2b-sales-enablement/
+
 Built by Shashwat Ghosh, Fractional CMO with 24+ years in B2B. CMO Asia Award winner.
 
 ## What's Inside
