@@ -62,6 +62,14 @@ Shashwat Ghosh  - Fractional CMO, Founder of Helix GTM Consulting
 
 https://www.gtmexpert.com | @Shashwat_Ghosh
 
+## Privacy
+
+This plugin sends no data to Helix GTM Consulting and runs no server. The skills run inside Claude. When you name a company or meeting attendees, Claude may research them with its own web search tools. The brand extraction script (sales-proposal-builder) runs on your machine, reads only the Office file you give it, and writes `brand_style.json` in your working folder. What you type into Claude is handled under your own Claude account terms.
+
+## Security
+
+To report a security problem, email shashwat@hyperplays.in with the subject "Security report: b2b-sales-enablement". Please do not open a public issue for it.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
