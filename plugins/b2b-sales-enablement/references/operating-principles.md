@@ -324,4 +324,4 @@ When in doubt, err toward asking the user a HARD STOP question rather than proce
 
 **File version:** 1.3 (September 2026), adapted for sales tasks in the b2b-sales-enablement plugin
 **Authorship:** Shared operating-principles core, originated in the Optise-Helix AEO Toolkit build, generalized for cross-plugin reuse
-**License:** see the LICENSE file at the root of this repository (MIT). Portions of this file originated in the Optise and Helix AEO Toolkit, which Optise and Helix GTM Consulting co-own; they are included here with the credit at the top of this file.
+**License:** MIT (see the LICENSE file at the root of this repository). This file is adapted from the operating principles co-authored by Optise and Helix GTM Consulting, which both co-authors have agreed to publish under the MIT License.

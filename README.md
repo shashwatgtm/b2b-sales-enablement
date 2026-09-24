@@ -2,7 +2,7 @@
 
 Client presentations, proposals, battle cards, and meeting prep for B2B sales professionals.
 
-Built by Shashwat Ghosh, Fractional CMO with 24+ years B2B experience. 15,100+ skill downloads on ClawHub. CMO Asia Award winner.
+Built by Shashwat Ghosh, Fractional CMO with 24+ years in B2B. CMO Asia Award winner.
 
 ## What's Inside
 
@@ -53,12 +53,10 @@ These skills build on the EPIC, IMPACT, and CRAFT frameworks when available. If 
 ## Author
 
 Shashwat Ghosh  - Fractional CMO, Founder of Helix GTM Consulting
-- 24+ years B2B marketing (Happay, Locus, FieldAssist, Bharti Airtel)
+- 24+ years in B2B (Happay, Locus, FieldAssist, Bharti Airtel)
 - 161% ARR growth at Happay (2x exit: CRED, MakeMyTrip)
 - $4.2M pipeline generated at Locus (acquired by IKEA/Ingka Group)
-- Top 30 PLG Creator Worldwide (Favikon verified)
-- 15,100+ skill downloads on ClawHub
-- 280+ founders diagnosed through GTM workshops
+- LinkedIn Top Product Marketing Voice, #10 India and #52 Worldwide (2024)
 
 https://www.gtmexpert.com | @Shashwat_Ghosh
 

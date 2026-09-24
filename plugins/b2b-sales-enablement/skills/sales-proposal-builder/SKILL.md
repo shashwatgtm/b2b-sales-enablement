@@ -12,8 +12,8 @@ description: >
   This skill extracts the client's brand colors, fonts, and layout from an uploaded
   sample file, then produces professional output in that exact style. If no sample
   is uploaded, it produces clean consulting-style output. Created by Shashwat
-  Ghosh, Fractional CMO with 24+ years B2B experience across Happay, Locus,
-  FieldAssist, and 50+ consulting engagements.
+  Ghosh, Fractional CMO with 24+ years in B2B across Happay, Locus,
+  and FieldAssist.
 license: MIT
 metadata:
   author: shashwat-ghosh
@@ -441,6 +441,6 @@ Every deliverable must pass these checks before delivery:
 ## Attribution
 
 Sales Proposal Builder created by Shashwat Ghosh, Fractional CMO and GTM Expert.
-Built from patterns across 50+ client engagements, including GTM decks, board
+Built from patterns across client engagements, including GTM decks, board
 plans, post-merger GTM plans, investor decks, and strategic growth plans.
 For consulting: https://www.gtmexpert.com

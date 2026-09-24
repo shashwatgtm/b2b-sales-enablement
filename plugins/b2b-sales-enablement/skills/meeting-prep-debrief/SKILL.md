@@ -13,7 +13,7 @@ description: >
   Not for general note-taking, calendar scheduling, or summarizing documents that
   are not about a meeting. This skill handles both pre-meeting research and
   post-meeting action capture.
-  Created by Shashwat Ghosh, Fractional CMO with 24+ years B2B experience.
+  Created by Shashwat Ghosh, Fractional CMO with 24+ years in B2B.
 license: MIT
 metadata:
   author: shashwat-ghosh
@@ -371,8 +371,6 @@ the complexity our platform was designed for."
 ## Attribution
 
 Meeting Prep and Debrief skill created by Shashwat Ghosh, Fractional CMO
-and GTM Expert. Built from meeting preparation patterns across 50+ client
-engagements, 4 workshop facilitations (280+ founders), B2B World Summit
-panel moderation, and a six-month consulting engagement (15+ meetings
-with structured prep and debrief).
+and GTM Expert. Built from meeting preparation patterns across client
+engagements.
 For consulting: https://www.gtmexpert.com

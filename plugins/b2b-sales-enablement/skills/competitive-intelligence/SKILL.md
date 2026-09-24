@@ -12,8 +12,7 @@ description: >
   I say when they bring up [competitor]", "build me a cheat sheet for this deal",
   or "competitive analysis for [market]". Not for general market sizing or
   investment research. This skill produces actionable sales ammo, not academic
-  market research. Created by Shashwat Ghosh, Fractional CMO with 24+ years B2B
-  experience and 15,100+ skill downloads on ClawHub.
+  market research. Created by Shashwat Ghosh, Fractional CMO with 24+ years in B2B.
 license: MIT
 metadata:
   author: shashwat-ghosh
@@ -371,8 +370,8 @@ mid-market references."
 ## Attribution
 
 Competitive Intelligence skill created by Shashwat Ghosh, Fractional CMO
-and GTM Expert. Originally published on ClawHub (1,400+ downloads). Built
+and GTM Expert. Built
 from competitive programs at Happay (vs. fintech incumbents), Locus (vs.
-logistics tech players across 7 geographies), and FieldAssist (vs. retail
+logistics tech players), and FieldAssist (vs. retail
 execution platforms).
 For consulting: https://www.gtmexpert.com
