@@ -1,9 +1,13 @@
 {
   "name": "b2b-sales-enablement",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Client presentations, proposals, battle cards, and meeting prep for B2B sales professionals.",
   "author": {
     "name": "Shashwat Ghosh",
     "url": "https://gtmexpert.com"
-  }
+  },
+  "homepage": "https://github.com/shashwatgtm/b2b-sales-enablement",
+  "repository": "https://github.com/shashwatgtm/b2b-sales-enablement",
+  "license": "MIT",
+  "keywords": ["b2b", "sales", "sales-enablement", "gtm", "battle-cards", "proposals", "meeting-prep"]
 }

@@ -2,16 +2,18 @@
 name: sales-proposal-builder
 description: >
   Build client-ready presentations (PPTX) and proposals (DOCX) using the client's own
-  brand styling. Use this skill whenever a sales person, AE, SDR, founder, or anyone
-  needs to create a client-facing deck, pitch presentation, sales proposal, one-pager,
-  solution overview, or business case document. Also trigger when someone says "I need
-  a deck for a client meeting", "help me build a proposal", "create a pitch for this
-  prospect", "make a presentation about our solution", "I have a meeting tomorrow and
-  need slides", or "prepare a client deliverable". This skill extracts the client's
-  brand colors, fonts, and layout from an uploaded sample file, then produces
-  professional output in that exact style. If no sample is uploaded, it produces clean
-  McKinsey-style output. Created by Shashwat Ghosh, Fractional CMO with 24+ years
-  B2B experience across Happay, Locus, FieldAssist, and 50+ consulting engagements.
+  brand styling. Use this skill when a sales person, AE, SDR, founder, or consultant
+  needs a client-facing sales deck, pitch presentation, sales proposal, one-pager,
+  solution overview, or business case for a specific prospect or client. Also trigger
+  when someone says "I need a deck for a client meeting", "help me build a proposal",
+  "create a pitch for this prospect", "make a presentation about our solution for
+  [prospect]", or "I have a client meeting tomorrow and need slides". Not for
+  internal team decks or general-purpose presentations with no client or prospect.
+  This skill extracts the client's brand colors, fonts, and layout from an uploaded
+  sample file, then produces professional output in that exact style. If no sample
+  is uploaded, it produces clean consulting-style output. Created by Shashwat
+  Ghosh, Fractional CMO with 24+ years B2B experience across Happay, Locus,
+  FieldAssist, and 50+ consulting engagements.
 license: MIT
 metadata:
   author: shashwat-ghosh
@@ -26,23 +28,24 @@ metadata:
 
 ## Section 0 — Operating Principles (MANDATORY — read before any workflow step)
 
-This skill operates under TWO mandatory reference files that together define all operating rules. **Read both files first**, before executing any workflow step in this SKILL.md. The rules in both files are non-negotiable and override any conflicting instruction in this SKILL.md body.
+This skill operates under TWO mandatory reference files that together define all operating rules. **Read both files first**, before executing any workflow step in this SKILL.md. The rules in both files override any conflicting instruction in this SKILL.md body.
 
-1. **`../../references/operating-principles.md`** — the shared core: 7 universal rules (rigor, challenge-assumptions, no-harmful-output, fact-check with 4-tier source hierarchy, no-LLMisms, HILT discipline with Question Budget, zero-assumption flagging) that apply to every skill in this plugin and every plugin using this pattern. This file is byte-identical across all plugins that use the shared-core pattern.
+1. **`${CLAUDE_PLUGIN_ROOT}/references/operating-principles.md`** (this plugin's own `references/` folder, two levels above this SKILL.md, never a same-named file in the user's project) — the shared core: 7 universal rules (rigor, challenge-assumptions, no-harmful-output, fact-check with 4-tier source hierarchy, no-LLMisms, HILT discipline with Question Budget, zero-assumption flagging) that apply to every skill in this plugin and every plugin using this pattern. This plugin's copy is adapted for sales tasks.
 
-2. **`../../references/plugin-specific-rules.md`** — the plugin-specific tail: additional operational rules tailored to the skills in THIS plugin. Read this file AFTER the shared core, not instead of it. If this plugin currently has no plugin-specific rules, the file will be a stub explaining the architecture.
+2. **`${CLAUDE_PLUGIN_ROOT}/references/plugin-specific-rules.md`** — the plugin-specific tail: additional operational rules tailored to the skills in THIS plugin. Read this file AFTER the shared core, not instead of it. If this plugin currently has no plugin-specific rules, the file will be a stub explaining the architecture.
 
 ### Critical reminders that apply to every invocation of this skill
 
 These are the highest-frequency rules from the two files above. Reading the full files is still mandatory — these reminders are a quick-reference, not a substitute.
 
 - **Web search and web fetch ARE available** in Claude Code's default toolset. "I don't have web access" is never a valid excuse to skip verification of a specific factual claim.
-- **English-only at v1** — never generate prompts, copy, headings, or client-facing text in non-English languages (German, French, Dutch, Spanish, Italian, Portuguese, Polish, etc.), even on explicit user request. This is a hard block, not a confirmation gate. Refuse the request and explain that multilingual may ship in v2 with native-speaker review.
+- **English by default.** Write client-facing text in English unless the user explicitly asks for another language. If they do, write it in that language after one short note that these skills were written and tested in English and a fluent speaker should check the output before it is sent. Never switch language on your own initiative.
 - **4-tier source hierarchy applies to all factual claims.** Tier 1: official primary sources (press releases, Crunchbase, Wikipedia, SEC filings). Tier 2: reputable analyst firms (Gartner, Forrester, IDC, G2, Capterra, GigaOm, SoftwareReviews). Tier 3: reputable business and trade press (WSJ, FT, Reuters, Bloomberg, HBR, TechCrunch, named-VC content, named-founder blogs). Tier 4: NEVER cite (random blogs, anonymous posts, AI-generated comparison sites, Forbes Contributor, paid placements). If only Tier 4 sources are available, the claim is unverified and MUST be flagged.
 - **Verify competitor relationships** via the 4-step search protocol in Rule 4 before building ANY competitor-targeted page or content. Run: `"[user] acquired [competitor]"`, `"[competitor] acquired by"`, `"[competitor] Crunchbase acquisition"`, `"[user] vs [competitor]"`. Any positive ownership hit is a HARD STOP — invoke Rule 3's no-harmful-output protection.
-- **Auto-verify URLs** via `web_fetch` before marking them `[EXISTS]`. Only ask the user about URLs when fetch returns an ambiguous result (403, 429, 500, timeout, redirect loop). Do not ask the user about every URL; that is endless interrogation, not verification.
+- **Auto-verify URLs** via `web_fetch` before citing them in a deliverable. Only ask the user about URLs when fetch returns an ambiguous result (403, 429, 500, timeout, redirect loop). Do not ask the user about every URL; that is endless interrogation, not verification.
 - **Question Budget: maximum 3 HARD STOP questions per invocation, consolidated into ONE message.** Never run an endless Q&A sequence. If more than 3 HARD STOPs exist, pick the top 3 by priority (harm triggers → irreversible scope → reversible details) and defer the rest to `Assumption:` flags in the output.
 - **Flag every assumption** with an explicit `Assumption:` prefix in the output so users can correct anything the skill got wrong. Use the `[User to add: <description>]` placeholder convention for any field where the user must supply specific information.
+- **The user's explicit instruction wins** over these rules after a short warning (which rule applies, and the risk). The one exception is genuinely harmful output under Rule 3 (invented statistics or quotes, claims that mislead buyers), which stays refused.
 
 ### Conflict resolution
 
@@ -58,7 +61,7 @@ If a domain rule in Section 7 of this SKILL.md (or any other section) appears to
 Match the client's visual language, not yours. A proposal in the client's brand style
 signals "we already think like your team." A proposal in YOUR brand style signals
 "we sent the same deck to everyone." When in doubt, use the client's colors, fonts,
-and layout. When the client's style is unknown, default to clean McKinsey-style:
+and layout. When the client's style is unknown, default to clean consulting-style:
 white background, dark navy text, minimal accent color, no clutter.
 
 ## Context and Role Detection
@@ -128,10 +131,19 @@ client's visual identity.
 When the user uploads a PPTX or DOCX file (their company deck, a previous proposal,
 or even a downloaded competitor deck):
 
-1. Run the brand extraction script:
+1. Run the brand extraction script bundled with this plugin. Always use the full
+   plugin path shown below, never a relative `scripts/` path, so a same-named
+   script in the user's project can never run instead. Pass the uploaded file's
+   path exactly as given, wrapped in single quotes so that spaces or shell
+   characters in the file name are treated as plain text. If the name itself
+   contains a single quote, first copy the file to a simple name such as
+   `brand_sample.pptx` and use that. Use `python3` if `python` is not available.
    ```bash
-   python scripts/extract_brand_style.py /mnt/user-data/uploads/<file> /home/claude/brand_style.json
+   python "${CLAUDE_PLUGIN_ROOT}/skills/sales-proposal-builder/scripts/extract_brand_style.py" '<path to uploaded file>' 'brand_style.json'
    ```
+   The script reads only the parts it needs from the file (it never unpacks the
+   archive to disk) and rejects oversized or malformed files with an `Error:`
+   message. The JSON is written to the current working folder.
 
 2. Read the output JSON. Key fields to use:
    - `design_tokens.primary_color`  - use as the main accent
@@ -143,24 +155,33 @@ or even a downloaded competitor deck):
    - `slide_dimensions` (PPTX)  - match exactly
    - `page_dimensions` / `margins` (DOCX)  - match exactly
 
-3. If logos are detected in the `logo_info` field, extract them from the unpacked
-   media directory and include them in the output. Place the logo where it appeared
-   in the original (typically top-left or top-right of the header/footer).
+3. If logos are detected in the `logo_info` field, read only those named image
+   files from the uploaded file (it is a zip archive; the images sit under
+   `ppt/media/` or `word/media/`), for example with Python's
+   `zipfile.ZipFile(path).read("ppt/media/image1.png")`, and include them in the
+   output. Check each image's `file_size` first and skip any image larger than
+   20 MB. Never unpack the whole archive. Place the logo where it appeared in the
+   original (typically top-left or top-right of the header/footer).
 
 4. Confirm the discovered style with the user before building:
    "I found your brand styling: [Primary color], [Heading font] + [Body font],
    [Aspect ratio]. Should I proceed with these, or adjust anything?"
 
 5. Store the extracted brand_style.json so future requests for the same client
-   skip the discovery step. Check for existing brand files first:
+   skip the discovery step. Before using the company name in a file path,
+   sanitize it: keep only letters, digits, and hyphens (replace spaces and every
+   other character with a hyphen, collapse repeated hyphens, and trim hyphens from
+   both ends), so the name can never add folders, `..`, quotes, or shell
+   characters to the path. Check for an existing brand file first, in the current
+   working folder, and tell the user where the file is saved:
    ```
-   /home/claude/brand_styles/<company-name>_brand_style.json
+   brand_styles/<company-slug>_brand_style.json
    ```
 
 
 ### Path A2: Client Uploads a PDF
 
-> **v1.1 upgrade planned:** This path uses visual inspection to estimate brand tokens, which produces a usable approximation but is less precise than Path A1's structured XML parsing. v1.1 will add a Python extraction script using PyMuPDF to read color and font metadata directly from PDF content streams, bringing PDF extraction quality on par with PPTX/DOCX (~90% of real-world PDFs). Until then, always confirm extracted tokens with the user before building output.
+> **Planned upgrade:** This path uses visual inspection to estimate brand tokens, which produces a usable approximation but is less precise than Path A1's structured XML parsing. A future version will add a Python extraction script using PyMuPDF to read color and font metadata directly from PDF content streams, bringing PDF extraction quality on par with PPTX/DOCX (~90% of real-world PDFs). Until then, always confirm extracted tokens with the user before building output.
 
 PDFs do not contain structured XML with font and color metadata the way PPTX/DOCX
 files do. When a user uploads a PDF as their brand sample:
@@ -206,7 +227,7 @@ When the user has no file to upload:
 1. Ask: "Do you have a company deck, proposal, or any branded document I can
    extract your style from? Even a 2-3 slide template works."
 
-2. If they cannot provide one, use McKinsey-clean defaults:
+2. If they cannot provide one, use clean consulting-style defaults:
    - Background: white (#FFFFFF)
    - Text: dark navy (#1A1F36)
    - Accent: professional blue (#2563EB)
@@ -216,20 +237,6 @@ When the user has no file to upload:
 
 3. Ask for at minimum: "What are your brand colors? And do you use a specific
    font?" Even a hex code and font name is enough to produce on-brand output.
-
-### Path C: Helix GTM Consulting Output
-
-When the deliverable is for Shashwat's own consulting practice:
-
-Use the Helix design system:
-- Dark: #111528, Light: #F4F3EF, Gold: #C9A962
-- Heading font: Georgia, Body font: Calibri
-- A4 for documents, 16:9 for presentations
-- Footer: "HELIX GTM CONSULTING | CONFIDENTIAL"
-
-Read `/mnt/skills/user/100-day-gtm-sprint/references/design-system.md` or
-`/mnt/skills/user/6-month-gtm-plan/references/design-system.md` for the full
-specification.
 
 ## Output Types
 
@@ -280,7 +287,7 @@ Structure:
    Reference specifics from their website, annual report, or conversations.
 4. **Proposed approach:** Phased methodology. What happens in month 1, 2, 3.
    Specific deliverables per phase.
-5. **Expected outcomes:** Quantified wherever possible. Use [Shashwat to add]
+5. **Expected outcomes:** Quantified wherever possible. Use `[User to add: ...]`
    placeholders for metrics you cannot verify.
 6. **Investment and terms:** Pricing, payment schedule, what's included/excluded.
 7. **Why us:** Brief credentials. Case studies from similar engagements.
@@ -314,7 +321,7 @@ Before writing a single slide or paragraph, gather context:
    if the `impact-quick-positioning` skill is available.
 
 4. **Never fabricate statistics.** If you need a metric (market size, ROI figure,
-   customer count), use `[Shashwat to add]` or `[Client to verify]` as placeholder.
+   customer count), use `[User to add: ...]` or `[Client to verify]` as placeholder.
    Real data from web search is acceptable when properly attributed.
 
 ## Handling Incomplete Inputs
@@ -353,8 +360,8 @@ Users will often provide minimal context. Here is how to handle it:
    key points.
 
 5. **White space is not wasted space.** A clean deck with breathing room looks
-   more expensive than a cluttered one. McKinsey charges $500K for decks with
-   40% whitespace. There is a reason.
+   more expensive than a cluttered one. Top consulting firms leave generous
+   whitespace in their decks. There is a reason.
 
 6. **Never include pricing on a slide in a pitch deck** unless explicitly asked.
    Pricing is a conversation, not a visual. Put it in the appendix or the
@@ -409,7 +416,7 @@ Every deliverable must pass these checks before delivery:
 ## Anti-Hallucination Rules
 
 - NEVER fabricate revenue figures, market share numbers, or customer counts.
-  Use `[Shashwat to add]` or `[Client to verify]` placeholders.
+  Use `[User to add: ...]` or `[Client to verify]` placeholders.
 - NEVER invent quotes from customers or executives. Attribute only verified
   statements from web search results.
 - NEVER claim competitive superiority without evidence. Use "positioned to" or
@@ -434,7 +441,6 @@ Every deliverable must pass these checks before delivery:
 ## Attribution
 
 Sales Proposal Builder created by Shashwat Ghosh, Fractional CMO and GTM Expert.
-Built from patterns across 50+ client engagements including SuperProcure (28-slide
-GTM deck), RRS-IENT (8-version board plan), SoftwareOne India (post-merger GTM),
-TCS (18-slide investor deck), and BDO Digital (strategic growth plan).
+Built from patterns across 50+ client engagements, including GTM decks, board
+plans, post-merger GTM plans, investor decks, and strategic growth plans.
 For consulting: https://www.gtmexpert.com

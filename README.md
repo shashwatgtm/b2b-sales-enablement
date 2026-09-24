@@ -6,7 +6,7 @@ Built by Shashwat Ghosh, Fractional CMO with 24+ years B2B experience. 15,100+ s
 
 ## What's Inside
 
-**Sales Proposal Builder**  - Create client-facing PPTX decks and DOCX proposals using the client's own brand styling. Upload a sample deck and the skill extracts their colors, fonts, and layout automatically. Produces McKinsey-clean output when no sample is available.
+**Sales Proposal Builder**  - Create client-facing PPTX decks and DOCX proposals using the client's own brand styling. Upload a sample deck and the skill extracts their colors, fonts, and layout automatically. Produces clean consulting-style output when no sample is available.
 
 **Competitive Intelligence**  - Research competitors and create sales-ready battle cards with landmine questions, objection handling, feature comparisons, and pricing intelligence. Focused on what AEs need in the field, not academic market research.
 
@@ -15,11 +15,11 @@ Built by Shashwat Ghosh, Fractional CMO with 24+ years B2B experience. 15,100+ s
 ## Install
 
 ```bash
-# Add the marketplace
-claude plugin marketplace add shashwatgtm/gtm-skills-marketplace
+# Add this repository as a marketplace
+claude plugin marketplace add shashwatgtm/b2b-sales-enablement
 
-# Install this package
-claude plugin install b2b-sales-enablement@shashwatgtm-skills
+# Install the plugin
+claude plugin install b2b-sales-enablement@b2b-sales-enablement
 ```
 
 ## Quick Start
@@ -28,10 +28,10 @@ claude plugin install b2b-sales-enablement@shashwatgtm-skills
 "I have a meeting with Acme Corp tomorrow. Here's their branded deck [upload PPTX]. Build me a 5-slide pitch about our procurement automation platform."
 
 **Get competitive ammo:**
-"We keep running into Coupa in deals. Build me a battle card with the top 5 objections our AEs hear and landmine questions to ask prospects."
+"We keep running into [competitor] in deals. Build me a battle card with the top 5 objections our AEs hear and landmine questions to ask prospects."
 
 **Prep for a meeting:**
-"I have a call at 3pm with the VP Procurement at Triveni Turbines. It's our second meeting. Last time she asked about SAP integration and she's also looking at Coupa."
+"I have a call at 3pm with the VP Procurement at [prospect company]. It's our second meeting. Last time she asked about ERP integration and she's also looking at [competitor]."
 
 ## How Brand Style Discovery Works
 
@@ -40,7 +40,7 @@ claude plugin install b2b-sales-enablement@shashwatgtm-skills
 3. Your output uses their exact visual identity
 4. Style is cached for future requests with the same client
 
-No sample available? The skill defaults to clean McKinsey-style: white background, navy text, minimal accents.
+No sample available? The skill defaults to clean consulting-style: white background, navy text, minimal accents.
 
 ## Who This Is For
 
@@ -61,3 +61,7 @@ Shashwat Ghosh  - Fractional CMO, Founder of Helix GTM Consulting
 - 280+ founders diagnosed through GTM workshops
 
 https://www.gtmexpert.com | @Shashwat_Ghosh
+
+## License
+
+MIT. See [LICENSE](LICENSE).

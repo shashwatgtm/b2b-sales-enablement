@@ -21,6 +21,7 @@ from extract_brand_style import (
     _parse_color,
     _extract_theme_colors,
     _build_design_tokens,
+    MAX_ARCHIVE_MEMBERS,
 )
 
 
@@ -131,21 +132,25 @@ class TestBuildDesignTokens(unittest.TestCase):
 class TestExtractBrandStyleUnsupported(unittest.TestCase):
     """Tests for unsupported file types."""
 
+    # The file is closed before it is read and deleted, so these tests also pass
+    # on Windows, which cannot delete a file that is still open.
     def test_unsupported_file_type(self):
         with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as f:
             f.write(b"fake")
-            f.flush()
+        try:
             result = extract_brand_style(f.name)
             self.assertIn("error", result)
             self.assertIn("Unsupported", result["error"])
+        finally:
             os.unlink(f.name)
 
     def test_invalid_zip(self):
         with tempfile.NamedTemporaryFile(suffix=".pptx", delete=False) as f:
             f.write(b"not a zip file at all")
-            f.flush()
+        try:
             result = extract_brand_style(f.name)
             self.assertIn("error", result)
+        finally:
             os.unlink(f.name)
 
 
@@ -318,10 +323,6 @@ class TestCLIInterface(unittest.TestCase):
                 data = json.load(f)
             self.assertEqual(data["file_type"], "pptx")
             self.assertIn("design_tokens", data)
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
 
 
 class TestPptxSlideContent(unittest.TestCase):
@@ -730,4 +731,59 @@ class TestCLIMainBlock(unittest.TestCase):
             self.assertIn("Body font", result.stdout)
             self.assertIn("Saved to", result.stdout)
 
+
+class TestUntrustedArchiveSafety(unittest.TestCase):
+    """The uploaded file is untrusted: it is never extracted, and size limits hold."""
+
+    PRES = '<?xml version="1.0"?><p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:sldSz cx="12192000" cy="6858000"/></p:presentation>'
+
+    def _make(self, tmp, members):
+        path = os.path.join(tmp, "upload.pptx")
+        with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as zf:
+            for name, data in members:
+                zf.writestr(name, data)
+        return path
+
+    def test_never_extracts_to_disk(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._make(tmp, [("ppt/presentation.xml", self.PRES), ("../../escape.xml", "<x/>")])
+            with patch.object(zipfile.ZipFile, "extractall", side_effect=AssertionError("extractall called")), \
+                    patch.object(zipfile.ZipFile, "extract", side_effect=AssertionError("extract called")):
+                result = extract_brand_style(path)
+            self.assertEqual(result["slide_dimensions"]["aspect_ratio"], "16:9")
+
+    def test_rejects_too_many_members(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            members = [("ppt/presentation.xml", self.PRES)]
+            members += [(f"ppt/junk/f{i}.bin", b"x") for i in range(MAX_ARCHIVE_MEMBERS)]
+            result = extract_brand_style(self._make(tmp, members))
+            self.assertIn("error", result)
+            self.assertIn("entries", result["error"])
+
+    def test_rejects_oversized_member(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._make(tmp, [("ppt/presentation.xml", self.PRES)])
+            with patch("extract_brand_style.MAX_MEMBER_BYTES", 50):
+                result = extract_brand_style(path)
+            self.assertIn("error", result)
+            self.assertIn("bytes uncompressed", result["error"])
+
+    def test_rejects_extreme_compression_ratio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bomb = "<a>" + " " * (2 * 1024 * 1024) + "</a>"
+            path = self._make(tmp, [("ppt/presentation.xml", self.PRES), ("ppt/slides/slide1.xml", bomb)])
+            result = extract_brand_style(path)
+            self.assertIn("error", result)
+            self.assertIn("compression ratio", result["error"])
+
+    def test_ignores_large_member_it_does_not_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            video = ("ppt/media/video1.bin", b"\0" * (2 * 1024 * 1024))
+            result = extract_brand_style(self._make(tmp, [("ppt/presentation.xml", self.PRES), video]))
+            self.assertNotIn("error", result)
+            self.assertEqual(result["slide_dimensions"]["aspect_ratio"], "16:9")
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
 

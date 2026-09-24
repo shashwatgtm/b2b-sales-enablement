@@ -2,13 +2,17 @@
 name: meeting-prep-debrief
 description: >
   Prepare for client meetings and capture post-meeting actions. Use this skill
-  whenever someone needs to prepare for a sales call, client meeting, investor
-  pitch, partner discussion, or board presentation. Also trigger when someone
-  says "I have a meeting with [person/company] tomorrow", "what should I know
-  before this call", "prep me for the meeting", "help me prepare talking points",
-  "summarize what we discussed", "what are the action items from that call",
+  when someone is preparing for a specific upcoming business meeting (a sales
+  call, client meeting, investor pitch, partner discussion, or board
+  presentation), or wants decisions, action items, and a follow-up email captured
+  after one. Also trigger when someone says "I have a meeting with
+  [person/company] tomorrow", "what should I know before this call", "prep me for
+  the meeting", "help me prepare talking points for the meeting", "summarize what
+  we discussed in the meeting", "what are the action items from that call",
   "draft a follow-up email after the meeting", or "debrief from today's session".
-  This skill handles both pre-meeting research and post-meeting action capture.
+  Not for general note-taking, calendar scheduling, or summarizing documents that
+  are not about a meeting. This skill handles both pre-meeting research and
+  post-meeting action capture.
   Created by Shashwat Ghosh, Fractional CMO with 24+ years B2B experience.
 license: MIT
 metadata:
@@ -24,23 +28,24 @@ metadata:
 
 ## Section 0 — Operating Principles (MANDATORY — read before any workflow step)
 
-This skill operates under TWO mandatory reference files that together define all operating rules. **Read both files first**, before executing any workflow step in this SKILL.md. The rules in both files are non-negotiable and override any conflicting instruction in this SKILL.md body.
+This skill operates under TWO mandatory reference files that together define all operating rules. **Read both files first**, before executing any workflow step in this SKILL.md. The rules in both files override any conflicting instruction in this SKILL.md body.
 
-1. **`../../references/operating-principles.md`** — the shared core: 7 universal rules (rigor, challenge-assumptions, no-harmful-output, fact-check with 4-tier source hierarchy, no-LLMisms, HILT discipline with Question Budget, zero-assumption flagging) that apply to every skill in this plugin and every plugin using this pattern. This file is byte-identical across all plugins that use the shared-core pattern.
+1. **`${CLAUDE_PLUGIN_ROOT}/references/operating-principles.md`** (this plugin's own `references/` folder, two levels above this SKILL.md, never a same-named file in the user's project) — the shared core: 7 universal rules (rigor, challenge-assumptions, no-harmful-output, fact-check with 4-tier source hierarchy, no-LLMisms, HILT discipline with Question Budget, zero-assumption flagging) that apply to every skill in this plugin and every plugin using this pattern. This plugin's copy is adapted for sales tasks.
 
-2. **`../../references/plugin-specific-rules.md`** — the plugin-specific tail: additional operational rules tailored to the skills in THIS plugin. Read this file AFTER the shared core, not instead of it. If this plugin currently has no plugin-specific rules, the file will be a stub explaining the architecture.
+2. **`${CLAUDE_PLUGIN_ROOT}/references/plugin-specific-rules.md`** — the plugin-specific tail: additional operational rules tailored to the skills in THIS plugin. Read this file AFTER the shared core, not instead of it. If this plugin currently has no plugin-specific rules, the file will be a stub explaining the architecture.
 
 ### Critical reminders that apply to every invocation of this skill
 
 These are the highest-frequency rules from the two files above. Reading the full files is still mandatory — these reminders are a quick-reference, not a substitute.
 
 - **Web search and web fetch ARE available** in Claude Code's default toolset. "I don't have web access" is never a valid excuse to skip verification of a specific factual claim.
-- **English-only at v1** — never generate prompts, copy, headings, or client-facing text in non-English languages (German, French, Dutch, Spanish, Italian, Portuguese, Polish, etc.), even on explicit user request. This is a hard block, not a confirmation gate. Refuse the request and explain that multilingual may ship in v2 with native-speaker review.
+- **English by default.** Write client-facing text in English unless the user explicitly asks for another language. If they do, write it in that language after one short note that these skills were written and tested in English and a fluent speaker should check the output before it is sent. Never switch language on your own initiative.
 - **4-tier source hierarchy applies to all factual claims.** Tier 1: official primary sources (press releases, Crunchbase, Wikipedia, SEC filings). Tier 2: reputable analyst firms (Gartner, Forrester, IDC, G2, Capterra, GigaOm, SoftwareReviews). Tier 3: reputable business and trade press (WSJ, FT, Reuters, Bloomberg, HBR, TechCrunch, named-VC content, named-founder blogs). Tier 4: NEVER cite (random blogs, anonymous posts, AI-generated comparison sites, Forbes Contributor, paid placements). If only Tier 4 sources are available, the claim is unverified and MUST be flagged.
 - **Verify competitor relationships** via the 4-step search protocol in Rule 4 before building ANY competitor-targeted page or content. Run: `"[user] acquired [competitor]"`, `"[competitor] acquired by"`, `"[competitor] Crunchbase acquisition"`, `"[user] vs [competitor]"`. Any positive ownership hit is a HARD STOP — invoke Rule 3's no-harmful-output protection.
-- **Auto-verify URLs** via `web_fetch` before marking them `[EXISTS]`. Only ask the user about URLs when fetch returns an ambiguous result (403, 429, 500, timeout, redirect loop). Do not ask the user about every URL; that is endless interrogation, not verification.
+- **Auto-verify URLs** via `web_fetch` before citing them in a deliverable. Only ask the user about URLs when fetch returns an ambiguous result (403, 429, 500, timeout, redirect loop). Do not ask the user about every URL; that is endless interrogation, not verification.
 - **Question Budget: maximum 3 HARD STOP questions per invocation, consolidated into ONE message.** Never run an endless Q&A sequence. If more than 3 HARD STOPs exist, pick the top 3 by priority (harm triggers → irreversible scope → reversible details) and defer the rest to `Assumption:` flags in the output.
 - **Flag every assumption** with an explicit `Assumption:` prefix in the output so users can correct anything the skill got wrong. Use the `[User to add: <description>]` placeholder convention for any field where the user must supply specific information.
+- **The user's explicit instruction wins** over these rules after a short warning (which rule applies, and the risk). The one exception is genuinely harmful output under Rule 3 (invented statistics or quotes, claims that mislead buyers), which stays refused.
 
 ### Conflict resolution
 
@@ -284,50 +289,55 @@ When the user has multiple meetings with the same prospect over time:
 ## Complete Worked Example
 
 ### Pre-Meeting Input:
-"I have a call at 3pm with Priya Sharma, VP Procurement at Triveni Turbines.
+"I have a call at 3pm with Dana Lee, VP Procurement at ExampleCo Industries.
 It's our second meeting. Last time we showed the demo and she asked about
-integration with their SAP system. She's also looking at Coupa."
+integration with their ERP system. She's also looking at CompetitorCo."
+
+(Dana Lee, ExampleCo Industries, and CompetitorCo are fictional names used for
+illustration. In a real brief, every fact about the attendee comes from a
+verified source or is flagged [Verify before meeting].)
 
 ### Pre-Meeting Output:
 ```
-MEETING BRIEF: Triveni Turbines | Today 3:00 PM
+MEETING BRIEF: ExampleCo Industries | Today 3:00 PM
 
 ATTENDEES:
-Priya Sharma  - VP Procurement  - 4 years at Triveni  - Recently posted about
-supply chain digitization at a CII event
+Dana Lee  - VP Procurement  - 4 years at ExampleCo  - Recently posted about
+supply chain digitization at an industry procurement event
 
 CONTEXT:
-Second meeting. Demo was shown in first meeting. She has a specific SAP
-integration concern and is also evaluating Coupa. This is likely a shortlist
+Second meeting. Demo was shown in first meeting. She has a specific ERP
+integration concern and is also evaluating CompetitorCo. This is likely a shortlist
 stage meeting  - she is narrowing from 3-4 vendors to 1-2.
 
 LAST INTERACTION:
-Demo shown. Priya asked about SAP integration (open item  - we need to answer
-this convincingly). She mentioned Coupa is also in evaluation.
+Demo shown. Dana asked about ERP integration (open item  - we need to answer
+this convincingly). She mentioned CompetitorCo is also in evaluation.
 
 DISCUSSION POINTS:
-1. SAP integration  - walk through the exact connector architecture, not just
-   "we integrate." Priya is technical enough to care about the details.
-2. Triveni's procurement volume  - ask about annual spend under management to
+1. ERP integration  - walk through the exact connector architecture, not just
+   "we integrate." Dana is technical enough to care about the details.
+2. ExampleCo's procurement volume  - ask about annual spend under management to
    size the implementation and show ROI math.
-3. Implementation timeline  - Coupa is known for 6-12 month implementations.
-   If our timeline is shorter, this is a key differentiator.
+3. Implementation timeline  - CompetitorCo's typical implementation time is
+   [X-Y months, per source and date]. If our timeline is shorter, this is a key
+   differentiator.
 
 ANTICIPATED QUESTIONS/OBJECTIONS:
-Q: "How does your SAP integration compare to Coupa's?"
-A: "Coupa has native SAP integration but requires their full suite. We offer
+Q: "How does your ERP integration compare to CompetitorCo's?"
+A: "CompetitorCo [describe its ERP integration from a verified source]. We offer
    modular integration  - you connect what you need, when you need it, without
-   replacing your existing SAP workflows." [VERIFY with engineering]
+   replacing your existing ERP workflows." [VERIFY with engineering]
 
 Q: "Can you handle our scale? We have 500+ vendors."
-A: "[Reference similar deployment if available, or use placeholder:
-   Shashwat to add reference customer with similar vendor count]"
+A: "[User to add: reference customer with a similar vendor count, or a similar
+   deployment if available]"
 
 DESIRED OUTCOME:
-Priya agrees to a pilot or technical evaluation with her IT team.
+Dana agrees to a pilot or technical evaluation with her IT team.
 
 MEETING STARTER:
-"Priya, I saw your panel at the CII procurement summit  - your point about
+"Dana, I saw your panel at the procurement summit  - your point about
 digitization in capital goods manufacturing really resonated. It is exactly
 the complexity our platform was designed for."
 ```
@@ -363,6 +373,6 @@ the complexity our platform was designed for."
 Meeting Prep and Debrief skill created by Shashwat Ghosh, Fractional CMO
 and GTM Expert. Built from meeting preparation patterns across 50+ client
 engagements, 4 workshop facilitations (280+ founders), B2B World Summit
-panel moderation, and the RRS-IENT consulting engagement (15+ meetings
-with structured prep and debrief across 6 months).
+panel moderation, and a six-month consulting engagement (15+ meetings
+with structured prep and debrief).
 For consulting: https://www.gtmexpert.com
