@@ -292,15 +292,21 @@ def _extract_pptx_style(archive: _OfficeArchive, source_file: str) -> dict:
             root = archive.parse_xml(pres_xml)
             slide_size = root.find(".//p:sldSz", NS)
             if slide_size is not None:
-                cx = int(slide_size.get("cx", "0"))
-                cy = int(slide_size.get("cy", "0"))
+                try:
+                    cx = int(slide_size.get("cx", "0"))
+                    cy = int(slide_size.get("cy", "0"))
+                except ValueError:
+                    cx = cy = 0  # a size that is not a whole number is treated as unknown
+                # A zero, missing or negative height has no aspect ratio (it used to divide by zero).
+                ratio = cx / cy if cx > 0 and cy > 0 else None
                 # EMU to inches
                 style["slide_dimensions"] = {
                     "width_emu": cx,
                     "height_emu": cy,
                     "width_inches": round(cx / 914400, 2),
                     "height_inches": round(cy / 914400, 2),
-                    "aspect_ratio": "16:9" if abs(cx / cy - 16 / 9) < 0.1 else "4:3" if abs(cx / cy - 4 / 3) < 0.1 else "custom",
+                    "aspect_ratio": ("unknown" if ratio is None else "16:9" if abs(ratio - 16 / 9) < 0.1
+                                     else "4:3" if abs(ratio - 4 / 3) < 0.1 else "custom"),
                 }
         except _XML_ERRORS:
             pass

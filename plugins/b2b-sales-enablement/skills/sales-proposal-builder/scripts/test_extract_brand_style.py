@@ -198,6 +198,37 @@ class TestExtractPptxStyle(unittest.TestCase):
             result = extract_brand_style(path)
             self.assertEqual(result["slide_dimensions"]["aspect_ratio"], "4:3")
 
+    def _pres(self, attrs):
+        return ('<?xml version="1.0"?><p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">'
+                f'<p:sldSz {attrs}/></p:presentation>')
+
+    def test_pptx_zero_height_does_not_crash(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._create_minimal_pptx(tmp, pres_xml=self._pres('cx="12192000" cy="0"'))
+            result = extract_brand_style(path)
+            self.assertEqual(result["slide_dimensions"]["aspect_ratio"], "unknown")
+            self.assertEqual(result["slide_dimensions"]["height_emu"], 0)
+            self.assertEqual(result["slide_dimensions"]["height_inches"], 0)
+
+    def test_pptx_missing_height_does_not_crash(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._create_minimal_pptx(tmp, pres_xml=self._pres('cx="12192000"'))
+            result = extract_brand_style(path)
+            self.assertEqual(result["slide_dimensions"]["aspect_ratio"], "unknown")
+
+    def test_pptx_zero_width_and_height(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._create_minimal_pptx(tmp, pres_xml=self._pres('cx="0" cy="0"'))
+            result = extract_brand_style(path)
+            self.assertEqual(result["slide_dimensions"]["aspect_ratio"], "unknown")
+
+    def test_pptx_non_numeric_size(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._create_minimal_pptx(tmp, pres_xml=self._pres('cx="wide" cy="tall"'))
+            result = extract_brand_style(path)
+            self.assertEqual(result["slide_dimensions"]["aspect_ratio"], "unknown")
+            self.assertEqual(result["slide_dimensions"]["width_emu"], 0)
+
     def test_pptx_with_theme(self):
         theme_xml = '''<?xml version="1.0"?>
         <a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">

@@ -54,7 +54,7 @@ These skills build on the EPIC, IMPACT, and CRAFT frameworks when available. If 
 
 ## Author
 
-Shashwat Ghosh  - Fractional CMO, Founder of Helix GTM Consulting
+Shashwat Ghosh, Co-Founder and Fractional CMO, Helix GTM Consulting
 - 24+ years in B2B (Happay, Locus, FieldAssist, Bharti Airtel)
 - 161% ARR growth at Happay (2x exit: CRED, MakeMyTrip)
 - $4.2M pipeline generated at Locus (acquired by IKEA/Ingka Group)
@@ -68,7 +68,7 @@ This plugin sends no data to Helix GTM Consulting and runs no server. The skills
 
 ## Security
 
-To report a security problem, email shashwat@hyperplays.in with the subject "Security report: b2b-sales-enablement". Please do not open a public issue for it.
+To report a security problem, email shashwat@gtmhelix.com with the subject "Security report: b2b-sales-enablement". Please do not open a public issue for it.
 
 ## License
 
