@@ -13,7 +13,7 @@ description: >
   sample file, then produces professional output in that exact style. If no sample
   is uploaded, it produces clean consulting-style output. Created by Shashwat
   Ghosh, Fractional CMO with 24+ years in B2B across Happay, Locus,
-  and FieldAssist.
+  and FieldAssist, and 10+ years fractional.
 license: MIT
 metadata:
   author: shashwat-ghosh

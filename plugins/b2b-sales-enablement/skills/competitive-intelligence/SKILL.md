@@ -12,7 +12,8 @@ description: >
   I say when they bring up [competitor]", "build me a cheat sheet for this deal",
   or "competitive analysis for [market]". Not for general market sizing or
   investment research. This skill produces actionable sales ammo, not academic
-  market research. Created by Shashwat Ghosh, Fractional CMO with 24+ years in B2B.
+  market research. Created by Shashwat Ghosh, Fractional CMO with 24+ years in B2B
+  and 10+ years fractional.
 license: MIT
 metadata:
   author: shashwat-ghosh

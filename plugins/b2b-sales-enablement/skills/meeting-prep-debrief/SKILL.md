@@ -13,7 +13,8 @@ description: >
   Not for general note-taking, calendar scheduling, or summarizing documents that
   are not about a meeting. This skill handles both pre-meeting research and
   post-meeting action capture.
-  Created by Shashwat Ghosh, Fractional CMO with 24+ years in B2B.
+  Created by Shashwat Ghosh, Fractional CMO with 24+ years in B2B and 10+ years
+  fractional.
 license: MIT
 metadata:
   author: shashwat-ghosh
