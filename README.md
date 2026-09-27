@@ -57,7 +57,7 @@ These skills build on the EPIC, IMPACT, and CRAFT frameworks when available. If 
 Shashwat Ghosh, Co-Founder and Fractional CMO, Helix GTM Consulting
 - 24+ years in B2B (Happay, Locus, FieldAssist, Bharti Airtel)
 - 10+ years of fractional experience
-- VP Marketing, Happay: 161% ARR growth. 2x exit: CRED ($180M), then MakeMyTrip.
+- VP Marketing, Happay: 161% ARR growth. 2x exit: to CRED ($180M+), then MakeMyTrip.
 - VP Performance Marketing, Locus: $4.2M pipeline. Acquired by IKEA (Ingka Group) in Oct 2025.
 - LinkedIn Top Product Marketing Voice, #10 India and #52 Worldwide (2024)
 
