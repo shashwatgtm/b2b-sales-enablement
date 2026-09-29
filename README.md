@@ -4,7 +4,7 @@ Client presentations, proposals, battle cards, and meeting prep for B2B sales pr
 
 Plugin page with install steps for Claude Code and Cowork, and real example outputs from each skill: https://tools.gtmhelix.com/plugins/b2b-sales-enablement/
 
-Built by Shashwat Ghosh, Fractional CMO with 24+ years in B2B and 10+ years of fractional experience. CMO Asia Award winner.
+Built by Shashwat Ghosh, Co-Founder and Fractional CMO, Helix GTM Consulting, with 24+ years in B2B and 10+ years of fractional experience. B2B Marketer of the Year 2020, Fintech (CMO Asia).
 
 ## What's Inside
 
@@ -55,11 +55,11 @@ These skills build on the EPIC, IMPACT, and CRAFT frameworks when available. If 
 ## Author
 
 Shashwat Ghosh, Co-Founder and Fractional CMO, Helix GTM Consulting
-- 24+ years in B2B (Happay, Locus, FieldAssist, Bharti Airtel)
+- 24+ years in B2B (Happay, Locus, FieldAssist, Airtel)
 - 10+ years of fractional experience
 - VP Marketing, Happay: 161% ARR growth. 2x exit: to CRED ($180M+), then MakeMyTrip.
 - VP Performance Marketing, Locus: $4.2M pipeline. Acquired by IKEA (Ingka Group) in Oct 2025.
-- LinkedIn Top Product Marketing Voice, #10 India and #52 Worldwide (2024)
+- LinkedIn Top Product Marketing Voice: #10 India, #52 worldwide (Favikon verified)
 
 https://www.gtmexpert.com | @Shashwat_Ghosh
 
