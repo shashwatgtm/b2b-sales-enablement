@@ -14,7 +14,8 @@ from unittest.mock import patch
 from xml.etree.ElementTree import Element, SubElement
 
 # Add script directory to path
-sys.path.insert(0, os.path.dirname(__file__))
+SCRIPT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), *['plugins', 'b2b-sales-enablement', 'skills', 'sales-proposal-builder', 'scripts'])   # the script stays in the plugin; its tests live here, outside the shipped folder
+sys.path.insert(0, SCRIPT_DIR)
 from extract_brand_style import (
     extract_brand_style,
     _hex_from_rgb,
@@ -344,7 +345,7 @@ class TestCLIInterface(unittest.TestCase):
             # Run as CLI
             import subprocess
             result = subprocess.run(
-                [sys.executable, os.path.join(os.path.dirname(__file__), "extract_brand_style.py"), pptx_path, output_path],
+                [sys.executable, os.path.join(SCRIPT_DIR, "extract_brand_style.py"), pptx_path, output_path],
                 capture_output=True, text=True
             )
             self.assertEqual(result.returncode, 0)
@@ -582,7 +583,7 @@ class TestCLIErrorPath(unittest.TestCase):
             out_path = os.path.join(tmp, "out.json")
 
             result = subprocess.run(
-                [sys.executable, os.path.join(os.path.dirname(__file__), "extract_brand_style.py"), bad_path, out_path],
+                [sys.executable, os.path.join(SCRIPT_DIR, "extract_brand_style.py"), bad_path, out_path],
                 capture_output=True, text=True
             )
             self.assertEqual(result.returncode, 1)
@@ -753,7 +754,7 @@ class TestCLIMainBlock(unittest.TestCase):
 
             out_path = os.path.join(tmp, "output.json")
             result = subprocess.run(
-                [sys.executable, os.path.join(os.path.dirname(__file__), "extract_brand_style.py"), pptx_path, out_path],
+                [sys.executable, os.path.join(SCRIPT_DIR, "extract_brand_style.py"), pptx_path, out_path],
                 capture_output=True, text=True
             )
             self.assertEqual(result.returncode, 0)
