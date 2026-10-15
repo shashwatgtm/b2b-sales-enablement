@@ -142,7 +142,7 @@ about after again also another because been before being both but could does don
 
 
 def words_of(t):
-    return {w.lower()[:6] for w in re.findall(r"[A-Za-z][A-Za-z'-]{2,}", t or "") if w.lower() not in COMMON}
+    return {w.lower()[:5] for w in re.findall(r"[A-Za-z][A-Za-z']{2,}", t or "") if w.lower() not in COMMON}   # loop 6: hyphens and dots split words
 
 
 def skill_context(path):
@@ -168,7 +168,28 @@ def skill_context(path):
 
 def related(reply, files, ctx):
     """A later turn is this plugin's to check when its reply or files share two or more words with the skill's own request."""
-    return len(words_of(reply + " " + " ".join(files)) & ctx) >= 2
+    return len(words_of(reply + " " + " ".join(os.path.basename(f) for f in files)) & ctx) >= (1 if files else 2)
+
+
+def after_skill_turn(path):
+    """True when the turn before this one loaded this plugin's skill and did not run the ledger (the skill asked for details first; loop 6)."""
+    plug = os.path.basename(ROOT)
+    marks = (os.path.join(ROOT, "skills"), ROOT.replace("\\", "/") + "/skills", f'"skill": "{plug}:', f'"skill":"{plug}:', f"/{plug}:")
+    turns, cur = [], {"loaded": False, "ledger": False}
+    with open(path, encoding="utf-8", errors="replace") as f:
+        for line in f:
+            try:
+                m = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(m, dict):
+                continue
+            loads = any(k in line for k in marks)
+            if is_prompt(m) and not loads:
+                turns.append(cur); cur = {"loaded": False, "ledger": False}
+            cur["loaded"] |= loads
+            cur["ledger"] |= "claim_ledger.py" in line and "--user" in line
+    return bool(turns) and turns[-1]["loaded"] and not turns[-1]["ledger"]
 
 
 def skill_loaded(path):
@@ -213,7 +234,7 @@ def decide(inp):
         files = [f for i in order for f in written(*calls[i])] + saved_in_folder(inp.get("cwd"), turn_start(inp["transcript_path"]))
         reply = "\n\n".join(x for _, x in texts) or (inp.get("last_assistant_message") or "")
         claimy = len(reply) >= LONG_REPLY or (len(reply) >= 40 and re.search(r"\d", reply))
-        if (files or claimy) and skill_loaded(inp["transcript_path"]) and related(reply, files, skill_context(inp["transcript_path"])):
+        if (files or claimy) and skill_loaded(inp["transcript_path"]) and (related(reply, files, skill_context(inp["transcript_path"])) or after_skill_turn(inp["transcript_path"])):
             return ("A skill of this plugin is in use in this conversation, and this answer " + ("saves " + ", ".join(sorted(set(files))[:4]) if files else "is long")
                     + " without the claim ledger. Run the skill's last step (\"Claim ledger and delivery\"): save user.txt, the pages and searches, "
                     "write reply.md, run claim_ledger.py on reply.md and every saved file until it exits 0, then run it with --final as your last "

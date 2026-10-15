@@ -161,7 +161,11 @@ def sentences(text):
         x = re.sub(r"\x01(\d+)\x01", lambda m: held[int(m.group(1))], x)
         if x.rstrip("*_ )").endswith("?"):
             # a question stays whole, except a statement placed before it (loop 5, r03 major 3): "X is so, so how do we ...?", "Given that X, who ...?"
-            m = re.match(r"(.+?)(?:;\s+|,\s+(?=(?:so|and|but|then)\s+(?:how|what|who|why|when|where|which|should|could|would|can|do|does|did|is|are|will)\b))(.+)$", x) \
+            rel = re.search(r"\b(who|that|which)\s+((?:has|have|had|is|are|was|were)\s+(?:already\s+)?(?:lost|left|stopped|chosen|decided|signed|frozen|cut|moved|gone|been)\b[^?]*)", x, re.I)
+            if rel:   # loop 6 (re-check r03-3): a claim in a relative clause of a question ("... a COO who has lost confidence?")
+                out += [x, rel.group(2).rstrip("?").strip() + "."]
+                continue
+            m = re.match(r"(.+?)(?::\s+(?=(?:how|what|who|why|when|where|which|should|could|would|can|do|does|did|is|are|will)\b)|;\s+|,\s+(?=(?:so|and|but|then)\s+(?:how|what|who|why|when|where|which|should|could|would|can|do|does|did|is|are|will)\b))(.+)$", x) \
                 or re.match(r"((?:given that|since|because|as)\b[^,?]+),\s+(.+)$", x, re.I)
             if m and not m.group(1).rstrip().endswith("?") and not re.match(r"\W*(who|what|how|why|when|where|which|whose|do|does|did|is|are|was|were|can|could|should|would|will|have|has|had|any)\b", m.group(1), re.I):
                 out += [m.group(1).strip(), m.group(2).strip()]
@@ -243,7 +247,11 @@ def significant(tok):
 
 def is_instruction(core):
     """An instruction starts with a verb; "Price per verification is ..." or "Pilot results will ..." start with a noun (loop 5, r03 major 2)."""
-    return bool(IMPERATIVE.match(core)) and not re.match(r"\W*\w+(?:\s+[\w'-]+){0,4}?\s+(is|are|was|were|will|would|has|have|had|matters|means)\b", core, re.I)
+    if not IMPERATIVE.match(core):
+        return False
+    if re.match(r"\W*[\w'-]+\s+(the|a|an|your|their|our|his|her|its|this|that|these|those|each|every|all|whether|if|how|what|which|who|it|them|him|me|us|one|two|three|any|some|no|both)\b", core, re.I):
+        return True   # loop 6 (re-check R2): "Confirm the renewal date is ...", "Check whether ..." are instructions
+    return not re.match(r"\W*\w+(?:\s+[\w'-]+){0,14}?\s+(is|are|was|were|will|would|has|have|had|matters|means|take|takes|took|run|runs|last|lasts)\b", core, re.I)
 
 
 def own_act(w, body, quotes):
@@ -263,6 +271,8 @@ def bold_heading(line):
     if not m:
         return False
     lab = m.group(1).strip().rstrip(":")
+    if re.search(r"\b(frozen|gone|lost|done|broken|chosen|taken|given|shown|known|stalled|blocked|cancelled|canceled|disengaged|churned|signed|left|cut)\b", lab, re.I):
+        return False   # loop 6 (re-check r03-4): "**Budget frozen**" states an account fact
     if SCOPE.search(lab) or GENERAL.search(lab) or (WORLD.search(lab) and len(lab.split()) > 2):
         return False   # loop 2: "**The CTO always vetoes**" is a claim, not a heading
     return (len(lab.split()) <= 8 and not lab.endswith((".", "!")) and not FACT_PRESENT.search(lab)
@@ -283,17 +293,24 @@ def section_label(line):
 
 def units(text):
     """(line number, kind, unit text, whole line) for every checkable piece; kind is 'row' for a table row, else 'prose'."""
-    out, fence, prev = [], False, ""
+    out, fence, prev, email = [], False, "", False
     for n, raw in enumerate(text.splitlines(), 1):
         line = raw.strip()
         last, prev = prev, line
         prev_line = last
         if line.startswith("```"):
-            fence = not fence
+            fence, email = not fence, False
             continue
         if fence:
+            if line and re.match(r"(subject:|hi\b|hello\b|dear\b|to:|from:|thanks|thank you)", line, re.I):
+                email = True
             if line:
-                out.append((n, "fence", line, line))
+                if email:   # loop 6 (re-check r03-5): an email to send, in a fence for copying, is read as prose
+                    for s_ in sentences(re.sub(r"^([-*+]|\d+[.)])\s+", "", line)):
+                        if s_.strip():
+                            out.append((n, "prose", s_.strip(), line))
+                else:
+                    out.append((n, "fence", line, line))
             continue
         if line.startswith(">"):   # loop 5 (r03 major 5): a block quote (a talk track, an email) is read as prose
             line = line.lstrip("> ").strip()
@@ -301,8 +318,9 @@ def units(text):
                 continue
         if line.startswith("#"):   # a heading is read unless it is a short label with no verb and no figure
             line = line.lstrip("# ").strip()
-            if not line or (bold_heading("**" + line.strip("*") + "**") and not re.search(r"\d", line)):
-                continue
+            plain = re.sub(r"\((?:about )?\d+\s*(?:minutes?|mins?|days?|weeks?)\)|\b(?:Days?|Weeks?|Months?|Phase|Step|Week|Risk|Q)\s*\d+(?:\s*(?:-|to)\s*\d+)?", " ", line)
+            if not line or (not re.search(r"\d", plain) and not FACT_PRESENT.search(line) and not re.search(r"\b(is|are|was|were|has|have|had|will|cut|cuts|lost|left|chose|signed)\b", line, re.I) and not line.endswith(".")):
+                continue   # loop 6 (re-check R1): a plain heading ("Agenda (45 minutes)", "Phase 2: Activation (Days 15-30)") is not a claim
         if not line or re.fullmatch(r"\*\*[HQ]\d+[a-z]?\b[^*\d%\"]*(\(about \d+ minutes?\))?\*\*", line) or section_label(line) or bold_heading(line):
             continue
         if line.startswith("|"):
@@ -455,6 +473,8 @@ def doubted(clause, norm_all):
 
 def fence_check(s, src):
     needs = []
+    if is_instruction(s) or re.search(r"\b(or fewer|or less|at most|no more than|under|max(imum)?|limit)\b", s, re.I):
+        return needs   # loop 6 (re-check R3): a limit in a prompt ("Write 120 words or fewer.") is an instruction, not a claim
     body = DATE.sub(" ", QUOTED.sub(" ", s))
     for tok in NUM.findall(re.sub(r"(\d) ?per ?cent\b", r"\1%", body)):
         k = fig_key(tok)
@@ -501,6 +521,12 @@ def check_unit(u, src):
             figs = [t for t in NUM.findall(body) if significant(t) and fig_key(t) in {fig_key(x) for x in NUM.findall("\n".join(src.pages))}]
             if held or figs:
                 needs.append(("CONTRADICT", "the page text you passed holds " + ", ".join(held + figs) + "; do not say it is missing or wrong"))
+    # loop 6 (re-check r03-1): a statement that denies something the user wrote ("Their IT team is not three people.")
+    if not is_q and re.search(r"\b(not|isn't|aren't|wasn't|weren't|never|no longer)\b", body, re.I) and not labels and not hedged:
+        positive = re.sub(r"\b(not|never|no longer)\s+", "", body.lower().replace("n't", ""))
+        pv = norm_text(re.sub(r"^\W+|[\W_]+$", "", positive))
+        if len(pv.split()) >= 3 and pv in norm_text(src.user):
+            needs.append(("CONTRADICT", "denies something you wrote; say what the source shows and ask, never correct the user as a fact"))
     # SEARCH (run 36P, from run 35P T-6): a sentence labelled as a search result must rest on the search results passed with --search
     if "search result" in labels and not is_q:
         if not src.search:

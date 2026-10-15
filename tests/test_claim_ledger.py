@@ -897,5 +897,49 @@ class Loop5(unittest.TestCase):
         self.assertEqual(code, 0, out)
 
 
+
+class Loop6(unittest.TestCase):
+    """Run 36P fresh re-check of loops 3 to 5 (evidence/run36p/audits/recheck-loops3-5.md): regressions R1 to R3 and partly open r03 lines."""
+    def test_recheck_R1_plain_headings_pass(self):
+        for h in ["## Agenda (45 minutes)", "## Phase 2: Activation (Days 15-30)", "## Week 1: Sponsor reset"]:
+            code, out = run_s(LEND, [h], method="Foundation (Days 1-14), Activation (15-30), Adoption (31-60). Agenda (45 minutes). Phase. Week. Sponsor reset.")
+            self.assertEqual(code, 0, h + "\n" + out)
+
+    def test_recheck_R1_claim_headings_are_read(self):
+        code, out = run_s(SCIU, ["## Acme PSA customers cut revenue leakage by 30%"])
+        self.assertEqual(code, 1, out)
+
+    def test_recheck_R2_instructions_with_is_pass(self):
+        for line in ["Confirm the renewal date is in the contract.", "Check whether the July rate is in the report."]:
+            code, out = run_s(LEND, [line])
+            self.assertEqual(code, 0, line + "\n" + out)
+
+    def test_recheck_r03_2_noun_openings(self):
+        for line in ["Lead time for a new PSA rollout at a firm this size is six months.", "Review cycles at firms like this take six months."]:
+            code, out = run_s(SCIU, [line])
+            self.assertEqual(code, 1, line + "\n" + out)
+
+    def test_recheck_R3_limits_in_a_fenced_prompt_pass(self):
+        code, out = run_s(SUSER, ["```\nWrite 120 words or fewer. One question at the end.\n```"])
+        self.assertEqual(code, 0, out)
+
+    def test_recheck_r03_5_fenced_email_is_read(self):
+        code, out = run_s(LEND, ["```\nSubject: next steps\nHi,\nAs agreed, your board has approved the renewal and the new CFO will sign next week.\n```"])
+        self.assertEqual(code, 1, out)
+
+    def test_recheck_r03_1_negated_user_fact(self):
+        code, out = run_s(SUSER, ["Their IT team is not three people."])
+        self.assertEqual(code, 1, out)
+
+    def test_recheck_r03_3_claim_inside_a_question(self):
+        for line in ["How do we win back a COO who has lost confidence in the rollout?", "The new CFO froze all vendor renewals in August: how do we respond?"]:
+            code, out = run_s(LEND, [line])
+            self.assertEqual(code, 1, line + "\n" + out)
+
+    def test_recheck_r03_4_bold_participle_line(self):
+        code, out = run_s(LEND, ["**Budget frozen**"])
+        self.assertEqual(code, 1, out)
+
+
 if __name__ == "__main__":
     unittest.main()

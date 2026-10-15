@@ -341,5 +341,29 @@ class Loop5Hook(unittest.TestCase):
         self.assertEqual(t.hook(reply)["decision"], "block")
 
 
+
+class Loop6Hook(unittest.TestCase):
+    """Run 36P re-check R4: real follow-ups after the skill turn are checked again."""
+    CRS = ("I manage key accounts at Acme Lending (hypothetical, for a test). Account (hypothetical): a consumer lending app in the UAE using us for "
+           "account verification and payouts, contract renews in 75 days. The CFO who signed us left in August.")
+
+    def test_recheck_R4_follow_up_claim(self):
+        reply = "The new CFO will renew if we match the lower price per verification."
+        t = T().user(self.CRS).user(LOADED).bash(LEDGER, final_out()).say(REPLY).user("What will the CFO do?").say(reply)
+        self.assertEqual(t.hook(reply)["decision"], "block")
+
+    def test_recheck_R4_skill_asked_then_answered_next_turn(self):
+        long = "Here is your save plan. Week 1: meet the new CFO and walk through July. " * 6
+        t = T().user(self.CRS).user(LOADED).say("Which provider made the other offer?").user("Not sure, go ahead.").say(long)
+        self.assertEqual(t.hook(long)["decision"], "block")
+
+    def test_recheck_R4_hyphenated_file_name(self):
+        d = pathlib.Path(tempfile.mkdtemp())
+        t = T().user(self.CRS).user(LOADED).bash(LEDGER, final_out()).say(REPLY).user("save it as a doc").bash(f"cd {d} && python3 make.py", "ok")
+        (d / "renewal-save-plan.docx").write_bytes(b"PK")
+        t.say("Saved.")
+        self.assertEqual(t.hook("Saved.", cwd=str(d))["decision"], "block")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
