@@ -177,6 +177,10 @@ def planted_in(text, user=False):
 
 WARN_LINE = re.compile(r"\binstructions?\b|\b(?:ai|a\.i\.|assistants?|model|llm|chatgpt)\b", re.I)   # loop 8 (r01 m1): the warning names the instruction to the AI
 WARN_NOT = re.compile(r"\b(did not|didn't|do not|don't|not follow|not followed|ignored|will not|won't|have not|haven't|not do|not act)\b", re.I)
+# run 37P loop 9 (round 1 COB2): a healthcare word from a page in an answer for a user outside healthcare (CLAUDE.md B75, B78)
+SECTOR = re.compile(r"\b(hipaa|patients?|clinics?|clinical|clinicians?|hospitals?|pharmac(?:y|ies|ists?)|healthcare|health care|physicians?|doctors?|nurses?|medical)\b", re.I)
+# loop 9 (round 1 CQB3): a message block (an email, a recap, a pitch) under one heading labelled as a draft needs no tag on every line
+MESSAGE_HEAD = re.compile(r"\b(e-?mails?|messages?|pitch(?:es)?|talk tracks?|scripts?|posts?|recaps?|letters?|level 3|narratives?|openers?|one[- ]liners?|one[- ]line|notes? to|invites?|follow[- ]ups?)\b", re.I)
 DRAFT_HEAD = re.compile(r"\bdraft for you to confirm\b|\bdraft\b[^\n]{0,30}\bto confirm\b", re.I)
 READ_QUAL = re.compile(r"\b(in|from) the (?:page )?(?:text|summary|copy|version) (?:i|we) (?:read|opened|fetched|got|saw)\b|\bin what i (?:read|fetched|opened)\b", re.I)
 NOTES_NAMED = re.compile(r"sector notes|\b[a-z ]+ row\b", re.I)
@@ -335,7 +339,7 @@ def section_label(line):
 def units(text):
     """(line number, kind, unit text, whole line) for every checkable piece; kind is 'row' for a table row, else 'prose'."""
     out, fence, prev, email, draft = [], False, "", False, 0
-    st = {"role": None, "head": "", "last": None}   # loop 8 (r01 M3): a role heading over its lines, the role a she/he points back to, the table header
+    st = {"role": None, "head": "", "last": None, "msg": 0}   # loop 8 (r01 M3): a role heading over its lines, the role a she/he points back to, the table header
     add = out.append
     def out_append(t):   # loop 7: every unit carries whether it sits in a draft block; loop 8: and the role context for COMBINE
         ctx = st["role"]
@@ -343,7 +347,7 @@ def units(text):
             ctx = st["last"]
         if t[1] == "rowrole":
             ctx = st["head"]
-        add(t + (draft, ctx))
+        add(t + (draft, ctx, bool(st["msg"])))
         if t[1] == "prose":
             r = roles_in(t[2])
             st["last"] = r[-1][0] if r else st["last"]
@@ -355,6 +359,7 @@ def units(text):
         if hm and not fence:   # loop 7: a heading labelled as a draft covers its block, down to the next heading of the same or a higher level
             lvl = len(hm.group(1))
             draft = lvl if DRAFT_HEAD.search(line) else (0 if draft and lvl <= draft else draft)
+            st["msg"] = lvl if (DRAFT_HEAD.search(line) and MESSAGE_HEAD.search(line)) else (0 if st["msg"] and lvl <= st["msg"] else st["msg"])
         elif not fence and re.fullmatch(r"\*\*[^*]{1,120}\*\*:?", line):
             draft = 7 if DRAFT_HEAD.search(line) else (0 if draft == 7 else draft)   # loop 8 (r01 M5): a bold draft label ends at the next bold label
         if not fence and (hm or re.fullmatch(r"\*\*[^*]{1,80}\*\*:?", line)):
@@ -633,6 +638,17 @@ def combine_check(text, src):
 
 
 def check_unit(u, src):
+    """Loop 9: the sector check runs on every unit, quotes included; a line of a message block labelled as a draft keeps only the checks
+    that a label never clears (figures, quotes, corrections of the user, search results, doubts, sector, choices)."""
+    needs, notes, labels = check_unit_core(u, src)
+    if SECTOR.search(u[2]) and not SECTOR.search(src.user):
+        needs = needs + [("SECTOR", f"'{SECTOR.search(u[2]).group(1)}' is a healthcare word the user did not use; these skills serve B2B teams outside healthcare: leave it out")]
+    if len(u) > 6 and u[6]:
+        needs = [x for x in needs if x[0] in ("FIGURE", "QUOTE", "CONTRADICT", "SEARCH", "DOUBT", "SECTOR", "CHOICE")]
+    return needs, notes, labels
+
+
+def check_unit_core(u, src):
     n, kind, s, whole = u[:4]
     if kind == "rowrole":   # loop 7 (SMD2): a table row that names a role: the row's other cells must be said about that role in the sources
         if len(u) > 4 and u[4]:

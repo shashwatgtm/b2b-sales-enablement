@@ -365,5 +365,24 @@ class Loop6Hook(unittest.TestCase):
         self.assertEqual(t.hook("Saved.", cwd=str(d))["decision"], "block")
 
 
+class Loop9Hook(unittest.TestCase):
+    """Run 37P loop 9, from round 1 (SCI3): the raw page read with curl -o is an input, and a file deleted before the end is not delivered."""
+    def test_page_downloaded_to_read_it_is_not_a_deliverable(self):
+        t = T().user("Build a battle card.").bash("curl -s https://example.com -o home.html", "").bash(LEDGER, final_out()).say(REPLY)
+        self.assertIsNone(t.hook())
+        t = T().user("Build a battle card.").bash("wget -q -O page.html https://example.com", "").bash(LEDGER, final_out()).say(REPLY)
+        self.assertIsNone(t.hook())
+
+    def test_file_deleted_before_the_end_is_not_delivered(self):
+        d = pathlib.Path(tempfile.mkdtemp())
+        t = T().user("Build a battle card.").bash("python3 make.py > card.md", "").bash("rm card.md", "").bash(LEDGER, final_out()).say(REPLY)
+        self.assertIsNone(t.hook(cwd=str(d)))
+
+    def test_file_saved_and_kept_is_still_checked(self):
+        d = pathlib.Path(tempfile.mkdtemp()); (d / "card.md").write_text("x", encoding="utf-8")
+        t = T().user("Build a battle card.").bash("python3 make.py > card.md", "").bash(LEDGER, final_out()).say(REPLY)
+        self.assertEqual((t.hook(cwd=str(d)) or {}).get("decision"), "block")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

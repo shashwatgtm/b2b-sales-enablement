@@ -14,6 +14,7 @@ What it reads: the Stop hook input (on standard input) and the session transcrip
 small counter file per session in a folder next to that transcript (b2b-sales-enablement-claim-ledger/), so it never sends Claude back more than twice.
 Run 36P loop 1: it also sends Claude back when a file saved in the turn was not checked by the --final run, and, in a conversation where a
 skill of this plugin was loaded, when a turn saves a deliverable or writes more than a short line without running the ledger.
+Run 37P loop 9: a page downloaded with curl or wget to read it, and a file deleted before the turn ends, are not deliverables.
 Loop 2: a file saved in the turn is also found by its change time in the working folder (names only, three levels down; it opens none).
 It sends nothing anywhere, makes no network call and reads no environment variable. Standard library only. It always exits 0; on any error it
 lets the reply through. (Run 36P: the run 35C hook of b2b-icp-and-customer-insight, with this plugin's name and skills.)
@@ -87,6 +88,8 @@ def written(name, ti):
         cmd = str(ti.get("command", ""))
         if read_only(cmd) or RUN.search(cmd):
             return []
+        if re.match(r"^\s*(?:cd\s+\S+\s*(?:&&|;)\s*)?(?:curl|wget)\b", cmd) and not re.search(r"\n|&&\s*(?!curl|wget)\w|;\s*(?!curl|wget)\w", cmd.split("curl", 1)[-1].split("wget", 1)[-1]):
+            return []   # run 37P loop 9: a page downloaded to read it (curl -o, wget -O) is an input, not a deliverable
         # loop 3: a shell command saves a file only through a redirect, tee or an output option; a file a script saves is found by the folder
         # scan; the plugin's own files (its references) are never deliverables
         targets = re.findall(r"(?:>>?|\btee(?:\s+-a)?|(?:^|\s)(?:-o|--output|--out)(?:=|\s+))\s*['\"]?([^\s'\";|&>]+)", cmd)
@@ -257,7 +260,9 @@ def decide(inp):
     final_cmd = str(calls[last][1].get("command", ""))
     checked = {os.path.basename(x.strip("'\"").replace("\\", "/")) for x in re.split(r"\s+", final_cmd)}   # whole file names (r02 minor 8)
     saved = [f for i in order[:order.index(last)] for f in written(*calls[i])] + saved_in_folder(inp.get("cwd"), turn_start(inp["transcript_path"]))
-    missing = sorted({f for f in saved if os.path.basename(f.replace("\\", "/")) not in checked})
+    cwd = inp.get("cwd")
+    gone = lambda f: bool(cwd) and not os.path.exists(f if os.path.isabs(f) else os.path.join(cwd, f))   # loop 9: deleted before the end, not delivered
+    missing = sorted({f for f in saved if os.path.basename(f.replace("\\", "/")) not in checked and not gone(f)})
     if missing:   # run 36P loop 1 (gate audit r01 major 7): every file saved in this turn is checked by the --final run
         return ("This turn saved " + ", ".join(missing[:4]) + ", but the last claim_ledger.py --final run did not check it. Run --final again "
                 "with the reply file and every saved file (Word, PowerPoint and Excel files included) as your last tool call, and send exactly "

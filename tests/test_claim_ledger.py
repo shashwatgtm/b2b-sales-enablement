@@ -1097,5 +1097,28 @@ class Loop8(unittest.TestCase):
         self.assertEqual(r.returncode, 2, r.stdout)
 
 
+class Loop9(unittest.TestCase):
+    """Run 37P loop 9, from round 1 judge findings (names removed)."""
+    def test_healthcare_word_from_a_page_is_listed(self):
+        page = "https://example.com/security\nCertified: SOC 2, HIPAA, PCI DSS, and GDPR."
+        code, out = run("Plan onboarding for a bank's call centre.", ['Send the bank the page\'s "SOC 2, HIPAA, PCI DSS, and GDPR" line.'], pages=[page])
+        self.assertIn("SECTOR:", out, out)
+        code, out = run("Plan onboarding for a bank's call centre.", ['Send the bank the page\'s security certifications, SOC 2 and PCI DSS.'], pages=[page])
+        self.assertNotIn("SECTOR:", out, out)
+
+    def test_healthcare_word_the_user_typed_passes(self):
+        code, out = run("Our customer is a clinic chain.", ["The clinic chain renews in May."])
+        self.assertNotIn("SECTOR:", out, out)
+
+    def test_message_under_a_draft_heading_needs_no_tag_per_line(self):
+        user = "Their head of product joined in July. Renewal in 3 months."
+        text = "## Recap email (draft for you to confirm)\n\nThanks for the review today. We will send the invoice by product line next week.\n\n## Next\n\nWe will send the invoice by product line next week."
+        code, out = run(user, [text])
+        self.assertNotIn("NEEDS line 3", out, out)
+        self.assertIn("NEEDS line 7", out, out)
+        code, out = run(user, ["## Recap email (draft for you to confirm)\n\nYour payouts grew 47% this quarter."])
+        self.assertIn("FIGURE:", out, out)
+
+
 if __name__ == "__main__":
     unittest.main()
