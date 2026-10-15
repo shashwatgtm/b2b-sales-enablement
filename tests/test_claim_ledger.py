@@ -838,5 +838,14 @@ class Loop2(unittest.TestCase):
             self.assertNotIn("FIGURE", out, line + "\n" + out)
 
 
+
+class Loop3(unittest.TestCase):
+    def test_the_skills_own_files_are_refused_as_deliverables(self):
+        ref = sorted(HERE.parent.glob("SKILL.md"))[0]
+        code, out = run_s(SUSER, ["Their IT team is three people.", ref])
+        self.assertEqual(code, 2, out)
+        self.assertIn("own file", out)
+
+
 if __name__ == "__main__":
     unittest.main()

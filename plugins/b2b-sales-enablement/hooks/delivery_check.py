@@ -82,12 +82,15 @@ def written(name, ti):
     """Deliverable files a tool call writes: Write, Edit or MultiEdit file paths; files a shell command names that is not a plain read."""
     if name in CHANGERS:
         f = str(ti.get("file_path") or ti.get("notebook_path") or "")
-        return [f] if f and DELIVERABLE.fullmatch(f.strip()) and not WORKING.search(f) else []
+        return [f] if f and DELIVERABLE.fullmatch(f.strip()) and not WORKING.search(f) and not os.path.abspath(f).startswith(ROOT) else []
     if name in SHELLS:
         cmd = str(ti.get("command", ""))
         if read_only(cmd) or RUN.search(cmd):
             return []
-        return [f for f in DELIVERABLE.findall(cmd) if not WORKING.search(f)]
+        # loop 3: a shell command saves a file only through a redirect, tee or an output option; a file a script saves is found by the folder
+        # scan; the plugin's own files (its references) are never deliverables
+        targets = re.findall(r"(?:>>?|\btee(?:\s+-a)?|(?:^|\s)(?:-o|--output|--out)(?:=|\s+))\s*['\"]?([^\s'\";|&>]+)", cmd)
+        return [f for f in targets if DELIVERABLE.fullmatch(f) and not WORKING.search(f) and not os.path.abspath(f).startswith(ROOT)]
     return []
 
 

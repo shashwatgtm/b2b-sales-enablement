@@ -774,6 +774,13 @@ def main(argv):
         pages = [read(p) for p in opts["--page"]]
         search = [read(p) for p in opts["--search"]]
         notes = "\n".join(read(p) for p in opts["--notes"])
+        import pathlib
+        own = pathlib.Path(__file__).resolve().parent.parent.parent.parent   # the plugin folder
+        here = pathlib.Path(__file__).resolve()
+        mine = [p for p in files if here.parent.parent.parent.name == "skills" and str(pathlib.Path(p).resolve()).startswith(str(own) + __import__("os").sep)]
+        if mine:   # loop 3: the skill's own SKILL.md or reference files are method text, never a deliverable
+            print(f"claim_ledger: {mine[0]} is one of this plugin's own files (method text the script already reads), not a file you deliver; "
+                  "pass only reply.md and the files you saved for the user"); return 2
         texts = [(p, read(p)) for p in files]
     except OSError as e:
         print(f"claim_ledger: cannot read {e.filename}: {e.strerror}"); return 2

@@ -224,9 +224,11 @@ LOADED = f"Base directory for this skill: {ROOTP}/skills/{SKILL0}\n\n# Skill tex
 class Loop1Hook(unittest.TestCase):
     """Run 36P gate audit r01: majors 7 and 8, minors 11, 15 and 17, as tests."""
     def test_r01_7_saved_file_not_passed_to_final_is_sent_back(self):
-        t = T().user("notes ...").user(LOADED).bash("python3 build.py  # writes save-plan.docx", "ok").tool("Write", {"file_path": "/w/ledger-check/reply.md", "content": REPLY}, "ok")
+        d = pathlib.Path(tempfile.mkdtemp())
+        t = T().user("notes ...").user(LOADED).bash(f"cd {d} && python3 build.py  # writes save-plan.docx", "ok").tool("Write", {"file_path": "/w/ledger-check/reply.md", "content": REPLY}, "ok")
+        (d / "save-plan.docx").write_bytes(b"PK")
         t.bash(LEDGER, final_out()).say(REPLY)
-        self.assertEqual(t.hook(REPLY)["decision"], "block")
+        self.assertEqual(t.hook(REPLY, cwd=str(d))["decision"], "block")
         t = T().user("notes ...").tool("Write", {"file_path": "/w/brief.md", "content": "x"}, "ok").bash(LEDGER, final_out()).say(REPLY)
         self.assertEqual(t.hook(REPLY)["decision"], "block")
 
@@ -301,6 +303,21 @@ class Loop2Hook(unittest.TestCase):
 
     def test_r02_m8_basename_must_match_whole(self):
         t = T().user("notes ...").tool("Write", {"file_path": "/out/plan.md", "content": "x"}, "ok").bash(LEDGER + " /out/old-plan.md", final_out()).say(REPLY)
+        self.assertEqual(t.hook(REPLY)["decision"], "block")
+
+
+
+class Loop3Hook(unittest.TestCase):
+    """Run 36P round 2 CAH1 and CQB3: reading the skill's reference files was taken for saving them, so the hook asked for them in --final."""
+    def test_reading_reference_files_is_not_saving(self):
+        cmd = f"cd {ROOTP}/skills/{SKILL0}; ls -R; cat references/input-rules.md; cat references/health-scoring-model.md"
+        t = T().user("notes ...").user(LOADED).bash(cmd, "text").bash(LEDGER, final_out()).say(REPLY)
+        self.assertIsNone(t.hook(REPLY))
+
+    def test_a_redirect_is_saving(self):
+        t = T().user("notes ...").bash("echo hi > /w/plan.md", "").bash(LEDGER, final_out()).say(REPLY)
+        self.assertEqual(t.hook(REPLY)["decision"], "block")
+        t = T().user("notes ...").bash("python3 make.py | tee /w/brief.md", "").bash(LEDGER, final_out()).say(REPLY)
         self.assertEqual(t.hook(REPLY)["decision"], "block")
 
 
