@@ -652,8 +652,14 @@ if __name__ == "__main__":
         sys.exit(1)
     else:
         tokens = result.get("design_tokens", {})
-        print(f"Brand style extracted from {args.input_file}")
-        print(f"  Primary color: {tokens.get('primary_color', 'N/A')}")
-        print(f"  Heading font:  {tokens.get('heading_font', 'N/A')}")
-        print(f"  Body font:     {tokens.get('body_font', 'N/A')}")
-        print(f"  Saved to: {args.output_json}")
+        lines = [f"Brand style extracted from {args.input_file}",
+                 f"  Primary color: {tokens.get('primary_color', 'N/A')}",
+                 f"  Heading font:  {tokens.get('heading_font', 'N/A')}",
+                 f"  Body font:     {tokens.get('body_font', 'N/A')}",
+                 f"  Saved to: {args.output_json}"]
+        print("\n".join(lines))
+        # the closing line the skill's claim ledger checks: this printed text came from this script (sha256 of the lines above, line ends
+        # and trailing spaces ignored, first 16 hex characters)
+        import hashlib
+        body = "\n".join(l.rstrip() for l in "\n".join(lines).strip().splitlines())
+        print(f"== extract_brand_style.py output check {hashlib.sha256(body.encode('utf-8')).hexdigest()[:16]} ==")
