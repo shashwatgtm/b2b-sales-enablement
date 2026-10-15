@@ -131,11 +131,12 @@ LABELS = {
 CONTRA = re.compile(r"\b(does ?n[o']t match|did ?n[o']t match|do ?n[o']t match|could ?n[o']t find|can ?n[o']t find|could not see|did ?n[o']t find|is ?n[o']t on|are ?n[o']t on|not (?:on|in) (?:the|your) (?:site|page|homepage|website)|"
                     r"no longer (?:says|reads|shows|on)|has changed|have changed|was changed|is (?:wrong|incorrect|outdated|out of date|inaccurate)|are (?:wrong|incorrect|outdated|inaccurate)|"
                     r"you called it|is a real company|is real\b|not a hypothetical|actually (?:says|reads|shows)|is no longer|are no longer|reads? differently|differs? from|"
-                    r"(?:headline|tagline|title|homepage|site|page|figure|number) (?:is|was) (?:different|wrong|outdated|old)|anywhere on)", re.I)
+                    r"(?:headline|tagline|title|homepage|site|page|figure|number) (?:is|was) (?:different|wrong|outdated|old)|anywhere on|"
+                    r"does ?n[o']t say|do ?n[o']t say|did ?n[o']t say|no longer says?|is gone|not current|is ?n[o']t current)", re.I)
 # loop 2 (gate audit r02 major 1): a sentence about the user's quoted line, tagline, headline or figure that says it changed, went or is old
 CONTRA_LINE = re.compile(r"\b(that|this|the|your) (tagline|headline|line|figure|number|quote|wording|claim|statement|title)\b|\bline you quoted\b", re.I)
-CONTRA_CHANGE = re.compile(r"\b(older|old|outdated|out of date|dropped|drops|removed|replaced|changed|moved on|no longer|not what|missing|gone|wrong|stale|retired|earlier version|previous version|not (?:on|in|there))\b", re.I)
-CONTRA_TOPIC = re.compile(r"\b(you|your|yours|homepage|home page|site|website|page|tagline|headline|title|hypothetical|real company|figure|quoted|line you)\b", re.I)
+CONTRA_CHANGE = re.compile(r"\b(older|old|outdated|out of date|dropped|drops|removed|replaced|changed|moved on|no longer|not what|missing|gone|wrong|stale|retired|earlier version|previous version|not (?:on|in|there)|not current|is ?n[o']t current)\b", re.I)
+CONTRA_TOPIC = re.compile(r"\b(you|your|yours|homepage|home page|site|website|page|tagline|headline|title|hypothetical|real company|figure|quoted|line you|wording)\b|\b[\w-]+\.(?:com|io|ai|co|in|net|org|app|tech|me|space)\b|\"", re.I)
 READ_QUAL = re.compile(r"\b(in|from) the (?:page )?(?:text|summary|copy|version) (?:i|we) (?:read|opened|fetched|got|saw)\b|\bin what i (?:read|fetched|opened)\b", re.I)
 NOTES_NAMED = re.compile(r"sector notes|\b[a-z ]+ row\b", re.I)
 QUOTED = re.compile(r'"([^"\n]+)"|“([^”\n]+)”')
@@ -159,7 +160,14 @@ def sentences(text):
     for x in SENT_END.sub("\\1\n", text).split("\n"):
         x = re.sub(r"\x01(\d+)\x01", lambda m: held[int(m.group(1))], x)
         if x.rstrip("*_ )").endswith("?"):
-            out.append(x); continue   # a question stays whole
+            # a question stays whole, except a statement placed before it (loop 5, r03 major 3): "X is so, so how do we ...?", "Given that X, who ...?"
+            m = re.match(r"(.+?)(?:;\s+|,\s+(?=(?:so|and|but|then)\s+(?:how|what|who|why|when|where|which|should|could|would|can|do|does|did|is|are|will)\b))(.+)$", x) \
+                or re.match(r"((?:given that|since|because|as)\b[^,?]+),\s+(.+)$", x, re.I)
+            if m and not m.group(1).rstrip().endswith("?") and not re.match(r"\W*(who|what|how|why|when|where|which|whose|do|does|did|is|are|was|were|can|could|should|would|will|have|has|had|any)\b", m.group(1), re.I):
+                out += [m.group(1).strip(), m.group(2).strip()]
+            else:
+                out.append(x)
+            continue
         quoted = []
         def hold(m):
             quoted.append(m.group(0)); return f"\x00{len(quoted) - 1}\x00"
@@ -233,6 +241,11 @@ def significant(tok):
         return False
 
 
+def is_instruction(core):
+    """An instruction starts with a verb; "Price per verification is ..." or "Pilot results will ..." start with a noun (loop 5, r03 major 2)."""
+    return bool(IMPERATIVE.match(core)) and not re.match(r"\W*\w+(?:\s+[\w'-]+){0,4}?\s+(is|are|was|were|will|would|has|have|had|matters|means)\b", core, re.I)
+
+
 def own_act(w, body, quotes):
     """A verb that reports the user's own act or a quoted source ("you gave", "your site says", "I opened") adds no fact about anyone else."""
     b = body.lower()
@@ -278,7 +291,19 @@ def units(text):
         if line.startswith("```"):
             fence = not fence
             continue
-        if fence or not line or line.startswith("#") or line.startswith(">") or re.fullmatch(r"\*\*[HQ]\d+[a-z]?\b[^*\d%\"]*(\(about \d+ minutes?\))?\*\*", line) or section_label(line) or bold_heading(line):
+        if fence:
+            if line:
+                out.append((n, "fence", line, line))
+            continue
+        if line.startswith(">"):   # loop 5 (r03 major 5): a block quote (a talk track, an email) is read as prose
+            line = line.lstrip("> ").strip()
+            if not line:
+                continue
+        if line.startswith("#"):   # a heading is read unless it is a short label with no verb and no figure
+            line = line.lstrip("# ").strip()
+            if not line or (bold_heading("**" + line.strip("*") + "**") and not re.search(r"\d", line)):
+                continue
+        if not line or re.fullmatch(r"\*\*[HQ]\d+[a-z]?\b[^*\d%\"]*(\(about \d+ minutes?\))?\*\*", line) or section_label(line) or bold_heading(line):
             continue
         if line.startswith("|"):
             if re.fullmatch(r"[|:\- ]+", line):
@@ -287,7 +312,8 @@ def units(text):
             header = not (prev_line or "").startswith("|")
             for ci, c in enumerate(cells):
                 if (header or ci == 0) and len(c.split()) <= 3 and not re.search(r"\d", c) and not FACT_PRESENT.search(c):
-                    out.append((n, "label", c, line))   # a header cell or a row label: checked for fact and domain words only
+                    # a header cell: checked for fact and domain words only; a row label is read strictly unless the method names it (loop 5)
+                    out.append((n, "label" if header else "rowlabel", c, line))
                     continue
                 for s in sentences(c):
                     if s.strip():
@@ -427,8 +453,25 @@ def doubted(clause, norm_all):
     return seen
 
 
+def fence_check(s, src):
+    needs = []
+    body = DATE.sub(" ", QUOTED.sub(" ", s))
+    for tok in NUM.findall(re.sub(r"(\d) ?per ?cent\b", r"\1%", body)):
+        k = fig_key(tok)
+        if k and significant(tok) and k not in src.user_figs and k not in src.source_figs:
+            needs.append(("FIGURE", f"{tok} is in no source (your message, a script output or a page)"))
+    for q in [a or b for a, b in QUOTED.findall(s)]:
+        if len(q.split()) >= 3 and norm_text(q).strip(" .,;:") not in src.norm_all and norm_text(q).strip(" .,;:") not in src.norm_method and not q.rstrip().endswith("?"):
+            needs.append(("QUOTE", f'"{q}" is not word for word in your message, a script output or a page'))
+    return needs
+
+
 def check_unit(u, src):
     n, kind, s, whole = u
+    if kind == "fence":   # loop 5 (r03 major 5): a fenced block (a prompt, an email to copy) is read for figures and quotes
+        return fence_check(s, src), [], []
+    if kind == "rowlabel":
+        kind = "label" if all(stem(w) in src.method_stems or w in STOP for w in WORDS.findall(s.lower())) else "row"
     label_cell = kind == "label"
     if label_cell:
         kind = "row"
@@ -443,6 +486,9 @@ def check_unit(u, src):
     is_cond = bool(COND.match(re.sub(r"^[*_\s]+", "", body)))
     if is_cond and re.search(r"\b(because|since|as|given that|which means)\b|:", body, re.I):
         is_cond = False   # a condition that also states a reason or a fact is read as a statement
+    wm = re.match(r"^[*_\s]*(when|where|once|after|before)\b[^,]*,\s*(.+)$", body, re.I)
+    if is_cond and wm and not is_instruction(wm.group(2)) and not re.search(r"\b(you|we|i)\b", body[:wm.start(2)], re.I):
+        is_cond = False   # loop 5 (r03 major 3): "When the July failures hit, their team escalated" states what happened
     labels = [k for k, rx in LABELS.items() if rx.search(s_clean)]
     hedged = bool(HEDGE.search(body))
     # CONTRADICT (run 36P, from run 35P J-5, J-7, J-10): never tell the user their own words, figure or page are wrong from a page summary
@@ -524,11 +570,11 @@ def check_unit(u, src):
     rating = bool(re.fullmatch(r"\W*[A-Za-z][\w /()-]{0,30}:\W*(very |highly )?(high|medium|low|critical|moderate|healthy|at risk|green|amber|red|yes|no|likely|unlikely|likely lost|none|n/a|tbd|unknown)\W*", body, re.I))
     lead0 = re.match(r"\W*\*\*([^*]{1,40}?):?\*\*:?\s*", body)
     core0 = body[lead0.end():] if lead0 and lead0.end() < len(body) else body
-    declarative = not rating and not IMPERATIVE.match(core0) and not meta_line(core0) and bool(re.search(r"[a-z]{3}", core0))
+    declarative = not rating and not is_instruction(core0) and not meta_line(core0) and bool(re.search(r"[a-z]{3}", core0))
     world = declarative or kind == "row" or bool(WORLD.search(body)) or bool(re.search(r"\b[\w-]+\.(?:com|io|ai|co|in|net|org|app|tech|space)\b", body, re.I)) or bool(FACT_PRESENT.search(body)) or any(stem(w) in src.stems and w[:1].isupper() for w in re.findall(r"\b[A-Z][a-zA-Z0-9]+\b", body))
     lead = re.match(r"\W*\*\*([^*]{1,40}?):?\*\*:?\s*", body)   # a leading bold label ("**Week 2:** Hold ...") is not part of the statement
     core = body[lead.end():] if lead and lead.end() < len(body) else body
-    imperative = bool(IMPERATIVE.match(core))   # an instruction to the reader: its 'never' or 'each' is not about the user's items
+    imperative = is_instruction(core)   # an instruction to the reader: its 'never' or 'each' is not about the user's items
     # run 36P: a clause of three or more words that is the user's or an opened page's text word for word restates a source and adds nothing
     vb = norm_text(re.sub(r"^\W+|[\W_]+$", "", body))
     verbatim = len(vb.split()) >= 3 and vb in src.norm_all and not doubted(vb, src.norm_all)   # loop 1 (r01 major 3)

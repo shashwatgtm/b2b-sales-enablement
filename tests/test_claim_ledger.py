@@ -847,5 +847,55 @@ class Loop3(unittest.TestCase):
         self.assertIn("own file", out)
 
 
+
+SCIU = ("I'm an account executive at Acme PSA (hypothetical). Our site: \"Agentic PSA Platform for Professional Services\". We lose to the status quo: "
+        "a 150 person IT consulting firm will keep running projects on spreadsheets.")
+
+
+class Loop5(unittest.TestCase):
+    """Run 36P gate audit r03 majors 1 to 5, as tests (names removed)."""
+    def test_r03_1_negated_page_line(self):
+        for line in ['One check before the meeting: acme.io does not say "The wireless backbone for physical AI" today.', "That wording is not current."]:
+            code, out = run_s(CELONA.replace("Acme Wireless", "Acme"), [line])
+            self.assertEqual(code, 1, line + "\n" + out)
+
+    def test_r03_2_noun_that_is_also_a_verb(self):
+        for line in ["Price per verification is the deciding factor for the new CFO.", "Pilot results will not change the new CFO's mind.",
+                     "Focus for the new CFO is cost, not reliability."]:   # "Plan B for them is the other provider." uses only the user's words: a limit of a word ledger (report)
+            code, out = run_s(LEND, [line])
+            self.assertEqual(code, 1, line + "\n" + out)
+
+    def test_r03_2_real_instructions_still_pass(self):
+        for line in ["Price the renewal at the current rate.", "Track the failed connection rate weekly.", "Plan the reset meeting for this week."]:
+            code, out = run_s(LEND, [line])
+            self.assertEqual(code, 0, line + "\n" + out)
+
+    def test_r03_3_fact_before_a_question_or_after_when(self):
+        for line in ["The new CFO is under board pressure to cut costs, so how do we frame the renewal?",
+                     "When the July failures hit, their support team escalated to the board."]:
+            code, out = run_s(LEND, [line])
+            self.assertEqual(code, 1, line + "\n" + out)
+
+    def test_r03_3_plain_questions_and_conditions_pass(self):
+        for line in ["Who signs the renewal now?", "If the new CFO wants a lower price, ask what the other offer covers.", "When you meet the new CFO, open with July."]:
+            code, out = run_s(LEND, [line])
+            self.assertEqual(code, 0, line + "\n" + out)
+
+    def test_r03_4_short_row_labels_with_account_facts(self):
+        table = "| Signal | Severity |\n|---|---|\n| CFO hostile | High |\n| Competitor shortlisted | High |"
+        code, out = run_s(LEND, [table])
+        self.assertTrue(needs(out, "CFO hostile") and needs(out, "Competitor shortlisted"), out)
+
+    def test_r03_5_headings_quotes_and_fences_are_read(self):
+        for line in ["## Acme PSA customers cut revenue leakage by 30%", '> "Firms your size lose about 12% of billable hours to spreadsheet gaps."',
+                     "```\nHi,\nAcme PSA saves 40 hours a month for firms like yours.\n```"]:
+            code, out = run_s(SCIU, [line])
+            self.assertEqual(code, 1, line + "\n" + out)
+
+    def test_r03_5_plain_headings_pass(self):
+        code, out = run_s(SCIU, ["## Battle card\n\n### Objections"])
+        self.assertEqual(code, 0, out)
+
+
 if __name__ == "__main__":
     unittest.main()

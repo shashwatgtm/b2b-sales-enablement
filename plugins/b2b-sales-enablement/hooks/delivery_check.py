@@ -137,6 +137,40 @@ def saved_in_folder(cwd, since):
     return out
 
 
+COMMON = set("""the and for are was were has had not you our out all any can did get got its new now one two see use who why how yes off own let say may per via
+about after again also another because been before being both but could does done each even from have here into just more most much must never only other over same should since some such than that their them then there these they this those through under very want what when where which while will with would your yours you""".split())
+
+
+def words_of(t):
+    return {w.lower()[:6] for w in re.findall(r"[A-Za-z][A-Za-z'-]{2,}", t or "") if w.lower() not in COMMON}
+
+
+def skill_context(path):
+    """The words of every message the person sent in a turn where this plugin's skill was loaded (loop 5, gate audit r03 major 6)."""
+    plug = os.path.basename(ROOT)
+    marks = (os.path.join(ROOT, "skills"), ROOT.replace("\\", "/") + "/skills", f'"skill": "{plug}:', f'"skill":"{plug}:', f"/{plug}:")
+    ctx, last_prompt, prev_prompt = set(), "", ""
+    with open(path, encoding="utf-8", errors="replace") as f:
+        for line in f:
+            try:
+                m = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(m, dict):
+                continue
+            if is_prompt(m):
+                c = (m.get("message") or {}).get("content")
+                prev_prompt, last_prompt = last_prompt, (c if isinstance(c, str) else " ".join(x.get("text", "") for x in c if isinstance(x, dict)) if isinstance(c, list) else "")
+            if any(k in line for k in marks):   # the request that loaded the skill (and the one before it, when the skill text came as its own message)
+                ctx |= words_of(last_prompt) | words_of(prev_prompt)
+    return ctx
+
+
+def related(reply, files, ctx):
+    """A later turn is this plugin's to check when its reply or files share two or more words with the skill's own request."""
+    return len(words_of(reply + " " + " ".join(files)) & ctx) >= 2
+
+
 def skill_loaded(path):
     """True when a skill of this plugin was loaded in this session (its folder named in the transcript, or a Skill call with its name)."""
     plug = os.path.basename(ROOT)
@@ -179,7 +213,7 @@ def decide(inp):
         files = [f for i in order for f in written(*calls[i])] + saved_in_folder(inp.get("cwd"), turn_start(inp["transcript_path"]))
         reply = "\n\n".join(x for _, x in texts) or (inp.get("last_assistant_message") or "")
         claimy = len(reply) >= LONG_REPLY or (len(reply) >= 40 and re.search(r"\d", reply))
-        if (files or claimy) and skill_loaded(inp["transcript_path"]):
+        if (files or claimy) and skill_loaded(inp["transcript_path"]) and related(reply, files, skill_context(inp["transcript_path"])):
             return ("A skill of this plugin is in use in this conversation, and this answer " + ("saves " + ", ".join(sorted(set(files))[:4]) if files else "is long")
                     + " without the claim ledger. Run the skill's last step (\"Claim ledger and delivery\"): save user.txt, the pages and searches, "
                     "write reply.md, run claim_ledger.py on reply.md and every saved file until it exits 0, then run it with --final as your last "

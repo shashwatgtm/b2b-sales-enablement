@@ -217,6 +217,7 @@ class AuditR02(unittest.TestCase):
 
 
 
+SKILLTURN = "I'm a CSM at Acme Lending (hypothetical). The new CFO said another provider offered a lower price per verification."
 ROOTP = HOOK.parent.parent
 LOADED = f"Base directory for this skill: {ROOTP}/skills/{SKILL0}\n\n# Skill text"
 
@@ -238,13 +239,13 @@ class Loop1Hook(unittest.TestCase):
         self.assertIsNone(t.hook(REPLY))
 
     def test_r01_8_follow_up_turn_without_the_ledger(self):
-        t = T().user("notes ...").user(LOADED).bash(LEDGER, final_out()).say(REPLY)
+        t = T().user(SKILLTURN).user(LOADED).bash(LEDGER, final_out()).say(REPLY)
         t.user("Make it punchier and save it as plan.docx").bash("python3 make.py plan.docx", "ok").say("Done. The CFO is the blocker and will sign only after a price cut.")
         self.assertEqual(t.hook("Done. The CFO is the blocker and will sign only after a price cut.")["decision"], "block")
 
     def test_r01_8_skill_ran_but_the_ledger_was_skipped(self):
-        long = "The CFO is the blocker. " * 40
-        t = T().user("notes ...").user(LOADED).say(long)
+        long = "The new CFO is weighing the lower price per verification from another provider. " * 12
+        t = T().user(SKILLTURN).user(LOADED).say(long)
         self.assertEqual(t.hook(long)["decision"], "block")
 
     def test_r01_8_short_chat_after_the_skill_is_left_alone(self):
@@ -293,8 +294,8 @@ class Loop2Hook(unittest.TestCase):
         self.assertIsNone(t.hook(REPLY, cwd=str(d)))
 
     def test_r02_5_short_follow_ups_with_a_claim(self):
-        for reply in ["Yes. The CFO is the blocker and will sign only after a 20% price cut.", "Your COO has lost confidence in the rollout and wants out."]:
-            t = T().user("notes ...").user(LOADED).bash(LEDGER, final_out()).say(REPLY).user("Is the CFO the blocker?").say(reply)
+        for reply in ["Yes. The CFO is the blocker and will sign only after a 20% price cut.", "Your new CFO has lost confidence in the verification fix and wants out."]:
+            t = T().user(SKILLTURN).user(LOADED).bash(LEDGER, final_out()).say(REPLY).user("Is the CFO the blocker?").say(reply)
             self.assertEqual(t.hook(reply)["decision"], "block", reply)
 
     def test_r02_5_tiny_replies_pass(self):
@@ -319,6 +320,25 @@ class Loop3Hook(unittest.TestCase):
         self.assertEqual(t.hook(REPLY)["decision"], "block")
         t = T().user("notes ...").bash("python3 make.py | tee /w/brief.md", "").bash(LEDGER, final_out()).say(REPLY)
         self.assertEqual(t.hook(REPLY)["decision"], "block")
+
+
+
+class Loop5Hook(unittest.TestCase):
+    """Run 36P gate audit r03 major 6: a later turn about something else is not this plugin's to check."""
+    SKILLTURN = "I'm a CSM at Acme Lending (hypothetical). The new CFO said another provider offered a lower price per verification."
+
+    def test_r03_6_unrelated_later_turns_are_left_alone(self):
+        t = T().user(self.SKILLTURN).user(LOADED).bash(LEDGER, final_out()).say(REPLY)
+        t.user("What time zone is Dubai in?").say("Dubai uses Gulf Standard Time, UTC plus 4, with no daylight saving.")
+        self.assertIsNone(t.hook("Dubai uses Gulf Standard Time, UTC plus 4, with no daylight saving."))
+        t = T().user(self.SKILLTURN).user(LOADED).bash(LEDGER, final_out()).say(REPLY)
+        t.user("rename foo to bar in app.py and fix the README").tool("Edit", {"file_path": "/w/app.py", "old_string": "foo", "new_string": "bar"}, "ok").say("Renamed foo to bar in app.py; the README needed no change.")
+        self.assertIsNone(t.hook("Renamed foo to bar in app.py; the README needed no change."))
+
+    def test_r03_6_related_follow_ups_are_still_checked(self):
+        reply = "Yes. The new CFO is the blocker and will sign only after a 20% price cut per verification."
+        t = T().user(self.SKILLTURN).user(LOADED).bash(LEDGER, final_out()).say(REPLY).user("Is the CFO the blocker?").say(reply)
+        self.assertEqual(t.hook(reply)["decision"], "block")
 
 
 if __name__ == "__main__":
