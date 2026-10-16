@@ -977,22 +977,26 @@ def digest(text):
 def office_text(path):
     """Text of a .docx, .pptx or .xlsx, every part a reader sees (loop 1, gate audit r01 major 5): one line per paragraph, a table row as
     "| a | b |". Word: the body, then headers, footers, footnotes, endnotes and comments. PowerPoint: each slide, then its speaker notes.
-    Excel: every shared and inline string, then each sheet's cells row by row. Standard library."""
+    Excel: every shared and inline string, then each sheet's cells row by row. Standard library.
+    Elements are matched by their local name (p, t, tr, tc; si, row, c, v), so a Strict Open XML file, whose namespace names differ
+    from the Transitional ones, is read the same way (run 40H; before, it read as empty)."""
     import zipfile, xml.etree.ElementTree as ET
-    W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
-    A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
-    X = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
-    P, T, TR, TC = (W + "p", A + "p"), (W + "t", A + "t"), (W + "tr", A + "tr"), (W + "tc", A + "tc")
+
+    def name(el):
+        return el.tag.rsplit("}", 1)[-1]
+
+    def named(el, n):
+        return (e for e in el.iter() if name(e) == n)
 
     def ptext(p):
-        return "".join(t.text or "" for t in p.iter() if t.tag in T)
+        return "".join(t.text or "" for t in named(p, "t"))
 
     def walk(el, out):
         for ch in el:
-            if ch.tag in TR:
-                cells = [" ".join(ptext(p) for p in tc.iter() if p.tag in P).strip() for tc in ch if tc.tag in TC]
+            if name(ch) == "tr":
+                cells = [" ".join(ptext(p) for p in named(tc, "p")).strip() for tc in ch if name(tc) == "tc"]
                 out.append("| " + " | ".join(cells) + " |")
-            elif ch.tag in P:
+            elif name(ch) == "p":
                 out.append(ptext(ch))
             else:
                 walk(ch, out)
@@ -1017,17 +1021,17 @@ def office_text(path):
         else:
             shared = []
             if "xl/sharedStrings.xml" in names:
-                for si in ET.fromstring(z.read("xl/sharedStrings.xml")).iter(X + "si"):
-                    shared.append("".join(t.text or "" for t in si.iter(X + "t")))
+                for si in named(ET.fromstring(z.read("xl/sharedStrings.xml")), "si"):
+                    shared.append("".join(t.text or "" for t in named(si, "t")))
             for n in sorted((n for n in names if re.fullmatch(r"xl/worksheets/sheet\d+\.xml", n)), key=num):
-                for row in ET.fromstring(z.read(n)).iter(X + "row"):
+                for row in named(ET.fromstring(z.read(n)), "row"):
                     cells = []
-                    for c in row.iter(X + "c"):
-                        v, t = c.find(X + "v"), c.get("t")
+                    for c in named(row, "c"):
+                        v, t = next((e for e in c if name(e) == "v"), None), c.get("t")
                         if t == "s" and v is not None and (v.text or "").isdigit() and int(v.text) < len(shared):
                             cells.append(shared[int(v.text)])
                         elif t == "inlineStr":
-                            cells.append("".join(x.text or "" for x in c.iter(X + "t")))
+                            cells.append("".join(x.text or "" for x in named(c, "t")))
                         elif v is not None:
                             cells.append(v.text or "")
                     if any(x.strip() for x in cells):

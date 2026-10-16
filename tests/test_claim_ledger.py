@@ -1120,5 +1120,40 @@ class Loop9(unittest.TestCase):
         self.assertIn("FIGURE:", out, out)
 
 
+class Run40H(unittest.TestCase):
+    """Run 40H: Office files are read by element name, so a Strict Open XML file (ISO/IEC 29500 Strict, which Word, PowerPoint and
+    Excel write under "Strict Open XML" and which uses other namespace names) is read exactly like a Transitional one; before, the
+    ledger read it as empty and checked nothing in that saved file."""
+    TW = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+    SW = 'xmlns:w="http://purl.oclc.org/ooxml/wordprocessingml/main"'
+    TP = 'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"'
+    SP = 'xmlns:a="http://purl.oclc.org/ooxml/drawingml/main" xmlns:p="http://purl.oclc.org/ooxml/presentationml/main"'
+    TX = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    SX = 'xmlns="http://purl.oclc.org/ooxml/spreadsheetml/main"'
+
+    def office(self, kind, ns):
+        d = pathlib.Path(tempfile.mkdtemp())
+        para = lambda t: f"<w:p><w:r><w:t>{t}</w:t></w:r></w:p>"
+        if kind == "docx":
+            body = para("Proposal.") + "<w:tbl><w:tr><w:tc>" + para("a") + "</w:tc><w:tc>" + para("b") + "</w:tc></w:tr></w:tbl>"
+            return zipped(d / "p.docx", {"word/document.xml": f"<w:document {ns}><w:body>{body}</w:body></w:document>",
+                                         "word/footer1.xml": f"<w:ftr {ns}>{para('Their CTO already approved the budget.')}</w:ftr>"})
+        if kind == "pptx":
+            return zipped(d / "d.pptx", {"ppt/slides/slide1.xml": f"<p:sld {ns}><a:p><a:r><a:t>Agenda</a:t></a:r></a:p></p:sld>",
+                                         "ppt/notesSlides/notesSlide1.xml": f"<p:notes {ns}><a:p><a:r><a:t>Their CTO has already chosen us.</a:t></a:r></a:p></p:notes>"})
+        return zipped(d / "s.xlsx", {"xl/sharedStrings.xml": f"<sst {ns}><si><t>The CFO will sign only after a price cut.</t></si></sst>",
+                                     "xl/worksheets/sheet1.xml": f'<worksheet {ns}><sheetData><row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1"><v>42</v></c></row></sheetData></worksheet>'})
+
+    def test_strict_word_powerpoint_excel_read_like_transitional(self):
+        for kind, t, s in (("docx", self.TW, self.SW), ("pptx", self.TP, self.SP), ("xlsx", self.TX, self.SX)):
+            want = cl.read(str(self.office(kind, t)))
+            self.assertTrue(want.strip(), kind)
+            self.assertEqual(cl.read(str(self.office(kind, s))), want, kind)
+
+    def test_strict_docx_claim_is_listed(self):
+        code, out = run_s(SUSER, [self.office("docx", self.SW)])
+        self.assertTrue(needs(out, "approved the budget"), out)
+
+
 if __name__ == "__main__":
     unittest.main()
