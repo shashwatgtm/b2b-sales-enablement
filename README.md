@@ -63,22 +63,6 @@ Shashwat Ghosh, Co-Founder and Fractional CMO, Helix GTM Consulting
 
 https://gtmhelix.com/about/ | @Shashwat_Ghosh
 
-## Claim ledger and delivery check (what runs on your computer)
-
-From this version each skill ends every answer with a claim ledger: a small Python script in the skill's folder (`skills/<skill>/scripts/claim_ledger.py`, standard library only) that Claude runs on the exact text it will deliver (the chat reply and every saved file, Word, PowerPoint and Excel files included). It lists every sentence about you, your company, your customers, buyers or deals, a named company or a person, every figure and every label, and marks the lines that go past what you wrote, the pages Claude opened, the search results it labelled and the scripts' printed output. Claude fixes those lines (quotes your words, labels a search result, turns a guess into a question or a "[User to add: ...]" slot) and delivers exactly the text the last run printed. The script reads only the files Claude passes to it (a copy of your message, the page text and search results Claude saved in a scratch folder named ledger-check, the reply and the saved files), writes no file, makes no network call and reads no environment variable.
-
-The claim ledger is the whole check. The plugin installs no hook: nothing runs on its own, and each skill's last step (the --final run) is what makes sure the reply you receive is the text the ledger checked.
-
-The tests for the script are in `tests/` at the repository root, outside the plugin folder; they are not installed with the plugin.
-
-## For reviewers
-
-What the shipped code does, for anyone reviewing this plugin (directory reviewers included). Everything below is checked in the files of this version.
-
-- `skills/<skill>/scripts/claim_ledger.py` (the same file in every skill, Python standard library only) reads only the files Claude names on its command line: a copy of the user's message, the page text and search results Claude saved, the reply and the saved files (Word, PowerPoint and Excel files are opened as zip archives with the standard library and read as text). It writes no file, sends nothing, opens no network connection, starts no program and reads no environment variable.
-- From this version the claim ledger reads Office files by element name, so it holds no web address at all, and Strict Open XML files are read like Transitional ones (before, a Strict file read as empty).
-- `skills/sales-proposal-builder/scripts/extract_brand_style.py` (unchanged since the live 1.1.x versions) reads the colours and fonts of a Word or PowerPoint file the user gives it. Its seven `http://schemas.openxmlformats.org/...` strings are the standard XML namespace names of the Office formats, which the standard library's XML reader needs to find elements by prefix; they are names, never addresses it contacts. It writes only the style file the user asks for, sends nothing, starts no program and reads no environment variable.
-
 ## Privacy
 
 This plugin sends no data to Helix GTM Consulting and runs no server. The skills run inside Claude. When you name a company or meeting attendees, Claude may research them with its own web search tools. The brand extraction script (sales-proposal-builder) runs on your machine, reads only the Office file you give it, and writes `brand_style.json` in your working folder. The claim ledger runs on your machine and send nothing. What you type into Claude is handled under your own Claude account terms.
