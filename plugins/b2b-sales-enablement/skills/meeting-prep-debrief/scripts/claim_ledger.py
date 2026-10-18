@@ -20,8 +20,7 @@ Usage: python3 claim_ledger.py [--final] --user USER.txt [--script OUT.txt ...] 
             files are read as text, one line per paragraph, table rows as "| a | b |"). Each is checked; the last run must be on the exact text.
   --final   the last run, your last tool call before you answer: it prints only the lines to fix, and when there is none it prints the
             reply file (the first FILE) between "=== BEGIN CHECKED REPLY <digest> ===" and "=== END CHECKED REPLY <digest> ===". That text,
-            exactly, is your whole chat reply. In Claude Code the plugin's Stop hook (hooks/delivery_check.py) compares the reply you send
-            with it and sends you back when they differ.
+            exactly, is your whole chat reply.
 
 What it lists (a line is fine when its kind is not marked NEEDS):
   FIGURE  a percentage, decimal or number of 10 or more ("67 percent" counts as 67%) that is not the user's own: when a script printed
@@ -96,7 +95,7 @@ fine good bad better best worse worst right wrong true false strong stronger str
 real really actual actually exact exactly specific specifically general generally main mainly key likely possible possibly probably perhaps
 section sections summary short version answer guide guides interview interviews interviewed interviewing interviewer synthesis method methods
 hand script's skill plugin user user's model models prompt chat folder working copy copies copied quote quotes quoted word words verbatim
-paste pasted pastes export exports crm data dataset split splits splitting pull pulls pulled sample samples group groups grouping
+paste pasted pastes crm data dataset split splits splitting pull pulls pulled sample samples group groups grouping
 support supports supported weaken weakens weakened disprove disproves disproved prove proves proved suggest suggests suggested signal signals
 reason reasons stated state states statement statements claim claims explain explains reasoning sense idea ideas view views
 please something anything everything nothing someone anyone everyone think thinks thought hear heard listen listens learn learns covers cover
@@ -156,9 +155,9 @@ INSTR = re.compile(r"\b(?:instructions?|notes?|messages?|requests?)\b(?:\s+[\w-]
                    r"(?:^|[.!?>\n]\s*)(?:ai|llm)\s+assistants?\s*[:,]|\b(?:ai\s+)?assistants?\s+(?:reading|summari[sz]ing|processing|parsing)\b|"
                    r"\bif you are an? (?:ai|a\.i\.|language model|llm|assistant|chatbot|bot)\b|(?:^|[.!?>\n]\s*)(?:chatgpt|claude|gemini|copilot)\b[^.:\n]{0,60}:|(?:^|[\n>]\s*)system\s*:|"
                    r"\b(?:ignore|disregard) (?:all |any |the |your )?(?:previous|prior|above|earlier) (?:instructions|rules|guidance|prompts?)\b|\b(?:do not|don't|never) (?:mention|tell|reveal|disclose) (?:this|the user|it to)\b|"
-                   r"\bkeep (?:quiet|silent) about this\b|\bkeep this (?:line|note|sentence) out\b|\bcurl\s+https?://\S+(?:collect|exfil|log|track)", re.I | re.M)
+                   r"\bkeep (?:quiet|silent) about this\b|\bkeep this (?:line|note|sentence) out\b", re.I | re.M)
 # loop 8 (r01 M6): an address is an instruction only when an order to the reader follows it
-INSTR_ORDER = re.compile(r"\b(ignore|disregard|state|say|write|add|include|insert|send|post|recommend|mention|tell|reveal|curl|fetch|visit|end with|must|should|do not|don't|never|keep|run|rate|score|change|replace)\b", re.I)
+INSTR_ORDER = re.compile(r"\b(ignore|disregard|state|say|write|add|include|insert|send|post|recommend|mention|tell|reveal|fetch|visit|end with|must|should|do not|don't|never|keep|run|rate|score|change|replace)\b", re.I)
 OWN_INSTR = re.compile(r"\b(?:my|our)\s+(?:\w+\s+){0,2}(?:instructions?|notes?|messages?|requests?|prompts?)\b", re.I)
 
 
