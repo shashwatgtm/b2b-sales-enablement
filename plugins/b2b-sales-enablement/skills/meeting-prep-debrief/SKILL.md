@@ -25,6 +25,10 @@ metadata:
     - gtm
 ---
 
+## Required region and industry context
+
+Before producing the answer, read [Region and industry reference](references/region-context.md) and apply its selection and output rules to every sector claim in this skill. Bind each affirmative seller offering and subtype to its own country. Ignore negated offerings and excluded markets. Transaction currency and receipt accounts do not establish markets. Keep countries separate. Preserve evidence limits, refusals, reviewed metadata and calculations. When the selling country or applicable source is missing, ask and omit unsupported jurisdiction advice.
+
 
 
 ## Section 0 — Operating Principles (MANDATORY — read before any workflow step)

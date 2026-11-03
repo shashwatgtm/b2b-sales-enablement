@@ -1,0 +1,49 @@
+{
+  "skills": [
+    {
+      "repo": "b2b-sales-enablement",
+      "path": "plugins/b2b-sales-enablement/skills/meeting-prep-debrief/SKILL.md",
+      "before_sha256": "03bb3d7dad4dd0207649bcb46840d0e31cc901e9ca0017b5c1c511d7a9dd949c",
+      "after_sha256": "104156d5d25979f11ca90a4e0796e53bdd4ce4d1ac4901b513b3e790a13ac988",
+      "frontmatter_sha256": "53808d57932edea4823da7978fbaa7fc0c4f69d649403f9fdb472ee4cd28a146",
+      "reference_sha256": "48e5917aecb374a4dfd467a5a74a066c1061c275d6110cc51b36a4860fe0bd8e"
+    },
+    {
+      "repo": "b2b-sales-enablement",
+      "path": "plugins/b2b-sales-enablement/skills/competitive-intelligence/SKILL.md",
+      "before_sha256": "d978befecf9e9f8b5855275ee058a5820192eed91b96284ef8c04bd3d0fbe621",
+      "after_sha256": "54b65cb1d6da8f71c2407ce166429742ca2f085184d303080895c4ad3507f2c7",
+      "frontmatter_sha256": "b7babd0f42a4b12b43b0ef3f1db78710518e202fcdfa6bae23f81f123db36c6e",
+      "reference_sha256": "48e5917aecb374a4dfd467a5a74a066c1061c275d6110cc51b36a4860fe0bd8e"
+    },
+    {
+      "repo": "b2b-sales-enablement",
+      "path": "plugins/b2b-sales-enablement/skills/sales-proposal-builder/SKILL.md",
+      "before_sha256": "a01361244040fdb1617be326fe0789394e9c65ad8f701b8d76b1017f8f8ea79f",
+      "after_sha256": "2bfae419a37454ec832711faf732f3bd450a4c36257ed9125f3e594f673b7ddf",
+      "frontmatter_sha256": "7b12f7265432db6233b3fc0f19d603275efe21c9ae46c9e2b6b28b32d5f775d5",
+      "reference_sha256": "48e5917aecb374a4dfd467a5a74a066c1061c275d6110cc51b36a4860fe0bd8e"
+    }
+  ],
+  "tools": {
+    "alpha": [
+      "gtm_consultation",
+      "epic_audit",
+      "generate_roadmap"
+    ],
+    "revenue": [
+      "account_plan_builder",
+      "deal_strategy_coach",
+      "discovery_question_bank",
+      "roi_business_case_builder",
+      "mutual_action_plan_generator",
+      "win_loss_analyzer",
+      "proposal_section_writer",
+      "email_sequence_generator",
+      "demo_script_builder",
+      "pricing_negotiation_guide",
+      "champion_enablement_kit",
+      "competitive_trap_setter"
+    ]
+  }
+}
