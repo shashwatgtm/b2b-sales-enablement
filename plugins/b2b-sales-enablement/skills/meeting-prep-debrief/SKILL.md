@@ -1,19 +1,16 @@
 ---
 name: meeting-prep-debrief
 description: >
-  Prepare for client meetings and capture post-meeting actions. Use this skill
-  when someone is preparing for a specific upcoming business meeting (a sales
-  call, client meeting, investor pitch, partner discussion, or board
-  presentation), or wants decisions, action items, and a follow-up email captured
-  after one. Also trigger when someone says "I have a meeting with
-  [person/company] tomorrow", "what should I know before this call", "prep me for
-  the meeting", "help me prepare talking points for the meeting", "summarize what
-  we discussed in the meeting", "what are the action items from that call",
-  "draft a follow-up email after the meeting", or "debrief from today's session".
-  Not for general note-taking, calendar scheduling, or summarizing documents that
-  are not about a meeting. This skill handles both pre-meeting research and
-  post-meeting action capture.
-  Created by Shashwat Ghosh, Fractional CMO with 24+ years in B2B and 10+ years
+  Helps you decide what to know, say and ask before a business meeting, and what was agreed after
+  it. For sellers, founders and anyone with a sales call, client meeting, investor pitch, partner
+  discussion or board presentation coming up. You give it who you are meeting and why, or your notes
+  from the meeting. You get research and talking points before it, or the decisions, action items
+  and a follow-up email after it. Use when someone says "I have a meeting with [person/company]
+  tomorrow", "what should I know before this call", "prep me for the meeting", "help me prepare
+  talking points for the meeting", "summarize what we discussed in the meeting", "what are the
+  action items from that call", "draft a follow-up email after the meeting" or "debrief from today's
+  session". Not for general note taking, calendar scheduling, or summarizing documents that are not
+  about a meeting. Created by Shashwat Ghosh, Fractional CMO with 24+ years in B2B and 10+ years
   fractional.
 license: MIT
 metadata:

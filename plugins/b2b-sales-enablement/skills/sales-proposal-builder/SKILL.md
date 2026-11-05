@@ -1,19 +1,17 @@
 ---
 name: sales-proposal-builder
 description: >
-  Build client-ready presentations (PPTX) and proposals (DOCX) using the client's own
-  brand styling. Use this skill when a sales person, AE, SDR, founder, or consultant
-  needs a client-facing sales deck, pitch presentation, sales proposal, one-pager,
-  solution overview, or business case for a specific prospect or client. Also trigger
-  when someone says "I need a deck for a client meeting", "help me build a proposal",
-  "create a pitch for this prospect", "make a presentation about our solution for
-  [prospect]", or "I have a client meeting tomorrow and need slides". Not for
-  internal team decks or general-purpose presentations with no client or prospect.
-  This skill extracts the client's brand colors, fonts, and layout from an uploaded
-  sample file, then produces professional output in that exact style. If no sample
-  is uploaded, it produces clean consulting-style output. Created by Shashwat
-  Ghosh, Fractional CMO with 24+ years in B2B across Happay, Locus,
-  and FieldAssist, and 10+ years fractional.
+  Helps a seller decide how to present the offer to one client or prospect, in that client's own
+  brand style. For sales people, AEs, SDRs, founders and consultants. You give it the prospect, your
+  solution and, if you have one, a sample file from the client. You get a client ready deck (PPTX)
+  or proposal (DOCX) in the colors, fonts and layout taken from the sample, or clean consulting
+  style output if there is no sample. Use when someone needs a client facing sales deck, pitch
+  presentation, sales proposal, one-pager, solution overview or business case for a specific
+  prospect or client, or says "I need a deck for a client meeting", "help me build a proposal",
+  "create a pitch for this prospect", "make a presentation about our solution for [prospect]" or "I
+  have a client meeting tomorrow and need slides". Not for internal team decks or general
+  presentations with no client or prospect. Created by Shashwat Ghosh, Fractional CMO with 24+ years
+  in B2B across Happay, Locus and FieldAssist, and 10+ years fractional.
 license: MIT
 metadata:
   author: shashwat-ghosh

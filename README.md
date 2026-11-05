@@ -1,6 +1,8 @@
 # B2B Sales Enablement Skills
 
-Client presentations, proposals, battle cards, and meeting prep for B2B sales professionals.
+For B2B sellers, founders and sales leaders who have to decide how to win against a named competitor, what to know before a meeting, and how to present the offer to one client. You give it the competitor, the meeting or the prospect; you get battle cards and objection handling, a meeting brief and debrief with a follow-up email, or a client deck (PPTX) or proposal (DOCX) in the client's own brand style.
+
+This plugin runs in Claude Code and Claude Cowork. The same skills are also bundled in the Helix GTM Suite for Gemini CLI and Antigravity: https://github.com/shashwatgtm/helix-gtm-suite
 
 Plugin page with install steps for Claude Code and Cowork, and real example outputs from each skill: https://tools.gtmhelix.com/plugins/b2b-sales-enablement/
 
@@ -55,7 +57,7 @@ These skills build on the EPIC, IMPACT, and CRAFT frameworks when available. If 
 ## Author
 
 Shashwat Ghosh, Co-Founder and Fractional CMO, Helix GTM Consulting
-- 24+ years in B2B (Happay, Locus, FieldAssist, Bharti Airtel)
+- 24+ years in B2B (Happay, Locus, FieldAssist, Airtel B2B)
 - 10+ years of fractional experience
 - VP Marketing, Happay: 161% ARR growth. 2x exit: to CRED ($180M+), then MakeMyTrip.
 - VP Performance Marketing, Locus: $4.2M pipeline. Acquired by IKEA (Ingka Group) in Oct 2025.

@@ -1,19 +1,17 @@
 ---
 name: competitive-intelligence
 description: >
-  Research competitors and create sales-ready battle cards, competitive positioning
-  matrices, and objection handling playbooks for B2B sales teams. Use this skill
-  when a B2B seller, sales leader, product marketer, or founder asks to research a
-  named competitor, build a battle card, prepare for a deal where a competitor is
-  involved, handle an objection about a rival product, compare features or pricing
-  against a named alternative, or analyze why deals were lost to a competitor.
-  Also trigger when someone says "the prospect is also looking at [competitor]",
-  "we keep losing to [company]", "how do we differentiate against", "what should
-  I say when they bring up [competitor]", "build me a cheat sheet for this deal",
-  or "competitive analysis for [market]". Not for general market sizing or
-  investment research. This skill produces actionable sales ammo, not academic
-  market research. Created by Shashwat Ghosh, Fractional CMO with 24+ years in B2B
-  and 10+ years fractional.
+  Helps a B2B sales team decide how to win against a named competitor. For sellers, sales leaders,
+  product marketers and founders. You give it the competitor and the deal or market. You get sales
+  ready battle cards, a competitive positioning matrix and objection handling for the field, not
+  academic market research. Use when someone asks to research a named competitor, build a battle
+  card, prepare for a deal where a competitor is involved, handle an objection about a rival
+  product, compare features or pricing against a named alternative, or analyze why deals were lost
+  to a competitor, or says "the prospect is also looking at [competitor]", "we keep losing to
+  [company]", "how do we differentiate against", "what should I say when they bring up
+  [competitor]", "build me a cheat sheet for this deal" or "competitive analysis for [market]". Not
+  for general market sizing or investment research. Created by Shashwat Ghosh, Fractional CMO with
+  24+ years in B2B and 10+ years fractional.
 license: MIT
 metadata:
   author: shashwat-ghosh
