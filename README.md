@@ -18,7 +18,7 @@ Built by Shashwat Ghosh, Fractional CMO with 24+ years in B2B and 10+ years of f
 
 ## Install
 
-```bash
+```text
 # Add this repository as a marketplace
 claude plugin marketplace add shashwatgtm/b2b-sales-enablement
 
@@ -67,7 +67,7 @@ https://gtmhelix.com/about/ | @Shashwat_Ghosh
 
 ## Privacy
 
-This plugin sends no data to Helix GTM Consulting and runs no server. The skills run inside Claude. When you name a company or meeting attendees, Claude may research them with its own web search tools. The brand extraction script (sales-proposal-builder) runs on your machine, reads only the Office file you give it, and writes `brand_style.json` in your working folder. The claim ledger runs on your machine and send nothing. What you type into Claude is handled under your own Claude account terms.
+This plugin sends no data to Helix GTM Consulting and runs no server. The skills run inside Claude. When you name a company or meeting attendees, Claude may research them with its own web search tools. The sales-proposal-builder skill reads the brand style per references/brand-style-method.md (with Claude's own code execution when it is available; otherwise the visual inspection path). It reads only the Office file you give it and writes `brand_style.json` in your working folder. The claim ledger runs on your machine and send nothing. What you type into Claude is handled under your own Claude account terms.
 
 ## Security
 

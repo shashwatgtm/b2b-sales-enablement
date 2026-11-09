@@ -131,19 +131,13 @@ client's visual identity.
 When the user uploads a PPTX or DOCX file (their company deck, a previous proposal,
 or even a downloaded competitor deck):
 
-1. Run the brand extraction script bundled with this plugin. Always use the full
-   plugin path shown below, never a relative `scripts/` path, so a same-named
-   script in the user's project can never run instead. Pass the uploaded file's
-   path exactly as given, wrapped in single quotes so that spaces or shell
-   characters in the file name are treated as plain text. If the name itself
-   contains a single quote, first copy the file to a simple name such as
-   `brand_sample.pptx` and use that. Use `python3` if `python` is not available.
-   ```bash
-   python "${CLAUDE_PLUGIN_ROOT}/skills/sales-proposal-builder/scripts/extract_brand_style.py" '<path to uploaded file>' 'brand_style.json'
-   ```
-   The script reads only the parts it needs from the file (it never unpacks the
-   archive to disk) and rejects oversized or malformed files with an `Error:`
-   message. The JSON is written to the current working folder.
+1. Read the brand style per `references/brand-style-method.md` (with your own
+   code execution when it is available; otherwise the visual inspection path).
+   Use this skill's own copy of that file, next to this SKILL.md, never a
+   same-named file in the user's project. The method reads only the parts it
+   needs from the file (it never unpacks the archive to disk), rejects oversized
+   or malformed files with an `Error:` message, and writes `brand_style.json` to
+   the current working folder.
 
 2. Read the output JSON. Key fields to use:
    - `design_tokens.primary_color`  - use as the main accent
@@ -157,11 +151,13 @@ or even a downloaded competitor deck):
 
 3. If logos are detected in the `logo_info` field, read only those named image
    files from the uploaded file (it is a zip archive; the images sit under
-   `ppt/media/` or `word/media/`), for example with Python's
-   `zipfile.ZipFile(path).read("ppt/media/image1.png")`, and include them in the
-   output. Check each image's `file_size` first and skip any image larger than
-   20 MB. Never unpack the whole archive. Place the logo where it appeared in the
-   original (typically top-left or top-right of the header/footer).
+   `ppt/media/` or `word/media/`), following the safety rules in
+   `references/brand-style-method.md` (with your own code execution when it is
+   available; otherwise the visual inspection path, where you ask the user for
+   the logo file), and include them in the output. Check each image's
+   uncompressed size first and skip any image larger than 20 MB. Never unpack
+   the whole archive. Place the logo where it appeared in the original
+   (typically top-left or top-right of the header/footer).
 
 4. Confirm the discovered style with the user before building:
    "I found your brand styling: [Primary color], [Heading font] + [Body font],
@@ -181,7 +177,7 @@ or even a downloaded competitor deck):
 
 ### Path A2: Client Uploads a PDF
 
-> **Planned upgrade:** This path uses visual inspection to estimate brand tokens, which produces a usable approximation but is less precise than Path A1's structured XML parsing. A future version will add a Python extraction script using PyMuPDF to read color and font metadata directly from PDF content streams, bringing PDF extraction quality on par with PPTX/DOCX (~90% of real-world PDFs). Until then, always confirm extracted tokens with the user before building output.
+> **Planned upgrade:** This path uses visual inspection to estimate brand tokens, which produces a usable approximation but is less precise than Path A1's structured XML parsing. A future version will add a written method for reading color and font metadata directly from PDF content streams with your own code execution, bringing PDF extraction quality on par with PPTX/DOCX (~90% of real-world PDFs). Until then, always confirm extracted tokens with the user before building output.
 
 PDFs do not contain structured XML with font and color metadata the way PPTX/DOCX
 files do. When a user uploads a PDF as their brand sample:
@@ -376,7 +372,7 @@ freight management. I need a 5-slide deck. Here's their branded deck from
 last year's conference."
 
 ### Process:
-1. Run brand extraction on uploaded PPTX → discovered: Navy (#1B365D), White,
+1. Read the brand style from the uploaded PPTX per `references/brand-style-method.md` → discovered: Navy (#1B365D), White,
    Orange accent (#E8751A), Calibri headings, Open Sans body, 16:9
 2. Web search: FMCG company website, recent supply chain news, freight challenges
 3. Build 5-slide deck in their brand:

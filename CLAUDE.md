@@ -8,12 +8,11 @@ This workspace contains 3 AI agent skills for B2B sales professionals.
 - **meeting-prep-debrief**: Pre-meeting research + post-meeting action capture
 
 ## Brand Style Extraction
-The sales-proposal-builder skill includes a Python script (`scripts/extract_brand_style.py`)
-that extracts brand colors, fonts, and layouts from uploaded PPTX/DOCX files. Run tests:
-```bash
-cd plugins/b2b-sales-enablement/skills/sales-proposal-builder/scripts
-python3 -m unittest test_extract_brand_style -v
-```
+The sales-proposal-builder skill reads brand colors, fonts, and page or slide sizes from
+uploaded PPTX/DOCX files: read the brand style per references/brand-style-method.md (with
+your own code execution when it is available; otherwise the visual inspection path). The
+plugin ships no scripts and no tests. The method file sits in
+`plugins/b2b-sales-enablement/skills/sales-proposal-builder/references/`.
 
 ## Frameworks
 These skills reference EPIC, IMPACT, and CRAFT frameworks by Shashwat Ghosh.
